@@ -21,9 +21,9 @@ public class FriendController {
     // API để lấy toàn bộ danh sách bạn bè của người dùng theo ID
     @GetMapping("")
     public ResponseEntity<List<User>> getAllFriends() {
-        // Lấy thông tin người dùng hiện tại từ SecurityContext
-       
-        Long userId = 1L;
+    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
 
         // Lấy danh sách bạn bè từ service
         List<User> friends = friendService.getAllFriends(userId);
@@ -39,8 +39,9 @@ public class FriendController {
     // API để tìm kiếm bạn bè theo tên
     @GetMapping("/search")
     public ResponseEntity<List<User>> searchFriends(@RequestParam String searchTerm) {
-        // Lấy thông tin người dùng hiện tại từ SecurityContext
-    	Long userId = 1L;
+    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
 
         // Lấy danh sách bạn bè
         List<User> friends = friendService.searchFriends(userId, searchTerm);
@@ -57,7 +58,9 @@ public class FriendController {
     @DeleteMapping("/{friendId}")
     public ResponseEntity<Void> deleteFriend(@PathVariable Long friendId) {
         // Lấy thông tin người dùng hiện tại từ SecurityContext
-    	Long userId = 1L;
+    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
 
         friendService.deleteFriend(userId, friendId);
 
