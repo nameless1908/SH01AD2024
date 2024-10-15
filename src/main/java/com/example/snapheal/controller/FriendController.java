@@ -55,8 +55,8 @@ public class FriendController {
     }
 
     // API để xóa bạn bè
-    @DeleteMapping("/{friendId}")
-    public ResponseEntity<Void> deleteFriend(@PathVariable Long friendId) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteFriend(@RequestParam Long friendId) {
         // Lấy thông tin người dùng hiện tại từ SecurityContext
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();

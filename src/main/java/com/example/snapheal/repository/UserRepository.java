@@ -10,6 +10,17 @@ import com.example.snapheal.model.User;
 
 public interface UserRepository extends CrudRepository<User, Long>{
 	
-	@Query("SELECT u FROM User u WHERE u.username LIKE %:searchTerm%")
-	List<User> findUsersBySearch(@Param("searchTerm") String searchTerm);
+	@Query(value = "SELECT u.*, " +
+	        "CASE " +
+	        "   WHEN fr.requester_id IS NOT NULL THEN fr.status " +
+	        "   ELSE NULL " +
+	        "END AS friend_status " +
+	        "FROM USER u " +
+	        "LEFT JOIN Friend_Request fr " +
+	        "ON (u.id = fr.requester_id AND fr.receiver_id = :currentUserId) " +
+	        "OR (u.id = fr.receiver_id AND fr.requester_id = :currentUserId) " +
+	        "WHERE u.username LIKE CONCAT('%', :searchTerm, '%')", 
+	        nativeQuery = true)
+	List<Object[]> searchUsersWithFriendStatus(@Param("currentUserId") Long currentUserId, @Param("searchTerm") String searchTerm);
+
 }

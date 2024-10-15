@@ -1,6 +1,7 @@
 package com.example.snapheal.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,11 @@ public class UserService {
 	@Autowired
 	private UserRepository userRepository;
 	
-	public List<User> searchUser(String searchTerm){
-		return userRepository.findUsersBySearch(searchTerm);
+	public Optional<User> findUserById(Long id) {
+        return userRepository.findById(id);
+    }
+	
+	public List<Object[]> searchUserWithFriendRequestStatus(Long currentUserId, String searchTerm) {
+	    return userRepository.searchUsersWithFriendStatus(currentUserId, searchTerm);
 	}
 }
