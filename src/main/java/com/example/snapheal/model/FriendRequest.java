@@ -21,11 +21,8 @@ public class FriendRequest {
     @Enumerated(EnumType.STRING)  // Sử dụng EnumType.STRING để lưu trữ giá trị enum dưới dạng chuỗi
     private FriendStatus status;
     
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-	public FriendRequest(Long id, User requester, User receiver, FriendStatus status) {
+	public FriendRequest(User requester, User receiver, FriendStatus status) {
 		super();
-		this.id = id;
 		this.requester = requester;
 		this.receiver = receiver;
 		this.status = status;

@@ -18,14 +18,10 @@ public class LocationTag {
     @JoinColumn(name = "tagged_user_id")
     private User taggedUser;
 
-    private LocalDateTime createdAt;
-
-	public LocationTag(Long id, Location location, User taggedUser, LocalDateTime createdAt) {
+	public LocationTag(Location location, User taggedUser) {
 		super();
-		this.id = id;
 		this.location = location;
 		this.taggedUser = taggedUser;
-		this.createdAt = createdAt;
 	}
 
 	public Long getId() {
@@ -50,13 +46,5 @@ public class LocationTag {
 
 	public void setTaggedUser(User taggedUser) {
 		this.taggedUser = taggedUser;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
 	}
 }

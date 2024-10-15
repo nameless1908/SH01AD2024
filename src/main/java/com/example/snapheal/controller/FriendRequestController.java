@@ -28,10 +28,11 @@ public class FriendRequestController {
     @PostMapping("")
     public ResponseEntity<FriendRequest> createFriendRequest(@RequestParam Long receiverId) {
         // Lấy thông tin người dùng hiện tại từ SecurityContext
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User requester = (User) authentication.getPrincipal();
+        //Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        //User requester = (User) authentication.getPrincipal();
 
         // Tìm người nhận dựa trên ID
+    	User requester = friendRequestService.findById(1L);
         User receiver = friendRequestService.findById(receiverId);
         
         if (requester == null || receiver == null) {
@@ -44,33 +45,19 @@ public class FriendRequestController {
     }
     
     // API để chấp nhận yêu cầu kết bạn
-    @PutMapping("/{requestId}/accept")
-    public ResponseEntity<FriendRequest> acceptFriendRequest(@PathVariable Long requestId) {
-        Optional<FriendRequest> friendRequestOpt = friendRequestService.findByRequestId(requestId);
-        
-        if (friendRequestOpt.isPresent()) {
-            FriendRequest friendRequest = friendRequestOpt.get();
-            friendRequest.setStatus(FriendStatus.ACCEPTED);  // Cập nhật trạng thái thành ACCEPTED
-            friendRequestRepository.save(friendRequest);
-            return ResponseEntity.ok(friendRequest);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @PutMapping("/accept")
+    public ResponseEntity<FriendRequest> acceptFriendRequest(@RequestParam Long requestId) {
+    	Optional<FriendRequest> friendRequestOpt = friendRequestService.acceptFriendRequest(requestId);
+
+        return friendRequestOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // API để từ chối yêu cầu kết bạn
-    @PutMapping("/{requestId}/reject")
-    public ResponseEntity<FriendRequest> rejectFriendRequest(@PathVariable Long requestId) {
-        Optional<FriendRequest> friendRequestOpt = friendRequestService.findByRequestId(requestId);
-        
-        if (friendRequestOpt.isPresent()) {
-            FriendRequest friendRequest = friendRequestOpt.get();
-            friendRequest.setStatus(FriendStatus.REJECTED);  // Cập nhật trạng thái thành REJECTED
-            friendRequestRepository.save(friendRequest);
-            return ResponseEntity.ok(friendRequest);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @PutMapping("/reject")
+    public ResponseEntity<FriendRequest> rejectFriendRequest(@RequestParam Long requestId) {
+    	Optional<FriendRequest> friendRequestOpt = friendRequestService.rejectFriendRequest(requestId);
+
+        return friendRequestOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
 

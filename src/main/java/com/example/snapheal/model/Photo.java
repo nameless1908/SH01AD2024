@@ -11,9 +11,8 @@ public class Photo {
     @JoinColumn(name = "location_id")
     private Location location;
     private String link_photo;
-	public Photo(Long id, Location location, String link_photo) {
+	public Photo(Location location, String link_photo) {
 		super();
-		this.id = id;
 		this.location = location;
 		this.link_photo = link_photo;
 	}

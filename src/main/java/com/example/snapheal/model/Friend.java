@@ -19,13 +19,12 @@ public class Friend {
     public Friend() {
     }
     
-	public Friend(Long id, User user, User friend) {
+	public Friend(User user, User friend) {
 		super();
-		this.id = id;
 		this.user = user;
 		this.friend = friend;
 	}
-
+	
 	public Long getId() {
 		return id;
 	}

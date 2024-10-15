@@ -21,22 +21,16 @@ public class User {
     private String password;
     private String avatar;
     
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    
     public User() {
     }
     
-	public User(Long id, String email, String username, String password, String avatar,LocalDateTime createdAt,
+	public User(String email, String username, String password, String avatar,LocalDateTime createdAt,
 			LocalDateTime updatedAt) {
 		super();
-		this.id = id;
 		this.email = email;
 		this.username = username;
 		this.password = password;
 		this.avatar = avatar;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
 	}
 	public Long getId() {
 		return id;
@@ -61,18 +55,6 @@ public class User {
 	}
 	public void setPassword(String password) {
 		this.password = password;
-	}
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
 	}
 	public String getAvatar() {
 		return avatar;
