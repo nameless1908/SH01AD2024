@@ -25,7 +25,7 @@ public class FriendController {
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
 
-        // Lấy danh sách bạn bè từ service
+        
         List<User> friends = friendService.getAllFriends(userId);
         
         // Trả về danh sách bạn bè nếu tìm thấy, nếu không trả về 404
@@ -43,7 +43,7 @@ public class FriendController {
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
 
-        // Lấy danh sách bạn bè
+        
         List<User> friends = friendService.searchFriends(userId, searchTerm);
         
         // Trả về danh sách nếu có, nếu không trả về 404
@@ -57,7 +57,7 @@ public class FriendController {
     // API để xóa bạn bè
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteFriend(@RequestParam Long friendId) {
-        // Lấy thông tin người dùng hiện tại từ SecurityContext
+        
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();

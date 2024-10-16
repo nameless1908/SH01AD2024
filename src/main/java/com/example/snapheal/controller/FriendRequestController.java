@@ -1,5 +1,6 @@
 package com.example.snapheal.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,10 @@ public class FriendRequestController {
     @PostMapping("")
     public ResponseEntity<FriendRequest> createFriendRequest(@RequestParam Long receiverId) {
         // Lấy thông tin người dùng hiện tại từ SecurityContext
-        //Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        //User requester = (User) authentication.getPrincipal();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User requester = (User) authentication.getPrincipal();
 
         // Tìm người nhận dựa trên ID
-    	User requester = friendRequestService.findById(1L);
         User receiver = friendRequestService.findById(receiverId);
         
         if (requester == null || receiver == null) {
@@ -58,6 +58,12 @@ public class FriendRequestController {
     	Optional<FriendRequest> friendRequestOpt = friendRequestService.rejectFriendRequest(requestId);
 
         return friendRequestOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/invite")
+    public ResponseEntity<List<User>> getPendingFriendRequests(@RequestParam Long userId) {
+        List<User> pendingRequests = friendRequestService.findPendingFriendRequests(userId);
+        return ResponseEntity.ok(pendingRequests);
     }
 }
 

@@ -20,5 +20,6 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     List<User> findFriendsBySearch(@Param("userId") Long userId, @Param("searchTerm") String searchTerm);
     
     void deleteByUserIdAndFriendId(Long userId, Long friendId);
+    
 }
 

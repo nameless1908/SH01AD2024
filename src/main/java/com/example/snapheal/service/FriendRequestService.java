@@ -1,5 +1,6 @@
 package com.example.snapheal.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class FriendRequestService {
         return friendRequestRepository.save(friendRequest); // Lưu vào DB
     }
 
+    // Chấp nhận yêu cầu kết bạn
     public Optional<FriendRequest> acceptFriendRequest(Long requestId) {
         Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findById(requestId);
 
@@ -60,6 +62,7 @@ public class FriendRequestService {
         return friendRequestOpt;
     }
 
+    // Từ chối yêu cầu kết bạn
     public Optional<FriendRequest> rejectFriendRequest(Long requestId) {
         Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findById(requestId);
 
@@ -69,5 +72,10 @@ public class FriendRequestService {
             friendRequestRepository.save(friendRequest);  // Lưu vào database
         }
         return friendRequestOpt;
+    }
+    
+    // Lấy danh sách lời mời kết bạn
+    public List<User> findPendingFriendRequests(Long userId) {
+        return friendRequestRepository.findPendingFriendRequests(userId);
     }
 }
