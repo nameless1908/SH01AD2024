@@ -1,13 +1,16 @@
 package com.example.snapheal.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.example.snapheal.model.User;
+import com.example.snapheal.entities.User;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface UserRepository extends CrudRepository<User, Long>{
 	
 	@Query(value = "SELECT u.*, " +
@@ -23,4 +26,6 @@ public interface UserRepository extends CrudRepository<User, Long>{
 	        nativeQuery = true)
 	List<Object[]> searchUsersWithFriendStatus(@Param("currentUserId") Long currentUserId, @Param("searchTerm") String searchTerm);
 
+	Optional<User> findByEmail(String email);
+//	Optional<User> findByUsername(String username);
 }

@@ -1,4 +1,4 @@
-package com.example.snapheal.model;
+package com.example.snapheal.entities;
 
 public enum FriendStatus {
     PENDING,   // Đang chờ phản hồi

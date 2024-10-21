@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.snapheal.model.User;
+import com.example.snapheal.entities.User;
 import com.example.snapheal.service.FriendService;
 
 import java.util.List;

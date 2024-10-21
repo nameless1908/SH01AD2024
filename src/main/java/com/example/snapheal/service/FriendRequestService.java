@@ -6,10 +6,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.snapheal.model.Friend;
-import com.example.snapheal.model.FriendRequest;
-import com.example.snapheal.model.FriendStatus;
-import com.example.snapheal.model.User;
+import com.example.snapheal.entities.Friend;
+import com.example.snapheal.entities.FriendRequest;
+import com.example.snapheal.entities.FriendStatus;
+import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRepository;
 import com.example.snapheal.repository.FriendRequestRepository;
 import com.example.snapheal.repository.UserRepository;

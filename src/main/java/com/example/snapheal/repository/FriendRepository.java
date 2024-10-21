@@ -1,7 +1,7 @@
 package com.example.snapheal.repository;
 
-import com.example.snapheal.model.Friend;
-import com.example.snapheal.model.User;
+import com.example.snapheal.entities.Friend;
+import com.example.snapheal.entities.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

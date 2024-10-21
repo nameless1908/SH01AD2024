@@ -9,9 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.snapheal.model.FriendRequest;
-import com.example.snapheal.model.FriendStatus;
-import com.example.snapheal.model.User;
+import com.example.snapheal.entities.FriendRequest;
+import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRequestRepository;
 import com.example.snapheal.service.FriendRequestService;
 

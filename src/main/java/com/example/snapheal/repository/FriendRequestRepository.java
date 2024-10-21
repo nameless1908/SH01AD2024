@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.example.snapheal.model.FriendRequest;
-import com.example.snapheal.model.User;
+import com.example.snapheal.entities.FriendRequest;
+import com.example.snapheal.entities.User;
 
 public interface FriendRequestRepository extends CrudRepository<FriendRequest, Long> {
 	

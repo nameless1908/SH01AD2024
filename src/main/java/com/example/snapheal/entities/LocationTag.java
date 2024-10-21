@@ -1,6 +1,4 @@
-package com.example.snapheal.model;
-
-import java.time.LocalDateTime;
+package com.example.snapheal.entities;
 
 import jakarta.persistence.*;
 

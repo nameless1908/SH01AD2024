@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.snapheal.model.User;
+import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.UserRepository;
 
 @Service

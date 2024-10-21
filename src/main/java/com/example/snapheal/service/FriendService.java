@@ -3,8 +3,8 @@ package com.example.snapheal.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.snapheal.model.Friend;
-import com.example.snapheal.model.User;
+import com.example.snapheal.entities.Friend;
+import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRepository;
 
 import jakarta.transaction.Transactional;
