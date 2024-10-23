@@ -27,5 +27,5 @@ public interface UserRepository extends CrudRepository<User, Long>{
 	List<Object[]> searchUsersWithFriendStatus(@Param("currentUserId") Long currentUserId, @Param("searchTerm") String searchTerm);
 
 	Optional<User> findByEmail(String email);
-//	Optional<User> findByUsername(String username);
+	Optional<User> findByUsername(String username);
 }
