@@ -38,7 +38,7 @@ public class AuthenticationService {
                 .orElseThrow(
                      () ->  new DataNotFoundException("User not found for email: " + input.getEmail())
                 );
-        if (!Objects.equals(user.getPassword(), input.getPassword())) {
+        if (!passwordEncoder.matches(input.getPassword(), user.getPassword())) {
             throw new DataNotFoundException("Password not correct!");
         }
         authenticationManager.authenticate(
