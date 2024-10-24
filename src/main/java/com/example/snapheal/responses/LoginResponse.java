@@ -11,6 +11,7 @@ import lombok.*;
 @Builder
 
 public class LoginResponse {
+    private Long id;
     private String email;
     private String username;
     private String fullName;

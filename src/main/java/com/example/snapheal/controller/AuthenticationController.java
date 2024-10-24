@@ -62,6 +62,7 @@ public class AuthenticationController {
         ;
         RefreshToken refreshToken = refreshTokenService.save(authenticatedUser, jwtToken);
         LoginResponse loginResponse = LoginResponse.builder()
+                .id(authenticatedUser.getId())
                 .email(authenticatedUser.getEmail())
                 .username(authenticatedUser.getUsername())
                 .fullName(authenticatedUser.getFullName())
@@ -84,6 +85,7 @@ public class AuthenticationController {
         User userDetails = userService.getUserDetailsFromRefreshToken(refreshTokenDto.getRefreshToken());
         RefreshToken token = refreshTokenService.refreshToken(refreshTokenDto.getRefreshToken(), userDetails);
         LoginResponse loginResponse = LoginResponse.builder()
+                .id(userDetails.getId())
                 .email(userDetails.getEmail())
                 .username(userDetails.getUsername())
                 .fullName(userDetails.getFullName())
