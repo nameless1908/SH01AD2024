@@ -1,8 +1,11 @@
 package com.example.snapheal.entities;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Data
+
 public class FriendRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +21,7 @@ public class FriendRequest {
 
     @Enumerated(EnumType.STRING)  // Sử dụng EnumType.STRING để lưu trữ giá trị enum dưới dạng chuỗi
     private FriendStatus status;
-    
+
 	public FriendRequest(User requester, User receiver, FriendStatus status) {
 		super();
 		this.requester = requester;
@@ -26,7 +29,7 @@ public class FriendRequest {
 		this.status = status;
 	}
 	public FriendRequest() {}
-	
+
 	public Long getId() {
 		return id;
 	}

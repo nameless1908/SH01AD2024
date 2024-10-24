@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.example.snapheal.responses.FriendResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -81,5 +82,15 @@ public class User implements UserDetails {
 	@Override
 	public String getPassword() {
 		return password;
+	}
+
+
+	public FriendResponse mapToFriendResponse() {
+		return FriendResponse.builder()
+				.id(id)
+				.avatar(avatar)
+				.username(username)
+				.fullName(fullName)
+				.build();
 	}
 }
