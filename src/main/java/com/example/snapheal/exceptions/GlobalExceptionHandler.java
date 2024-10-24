@@ -19,4 +19,16 @@ public class GlobalExceptionHandler {
                         .build()
         );
     }
+
+    @ExceptionHandler(TokenInvalidException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ResponseObject> handleRefreshTokenNotFoundException(TokenInvalidException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ResponseObject.builder()
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .message(ex.getMessage())
+                        .data(null)
+                        .build()
+        );
+    }
 }
