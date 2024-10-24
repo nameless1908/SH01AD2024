@@ -54,7 +54,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseObject> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<ResponseObject> authenticate(@RequestBody LoginUserDto loginUserDto) throws Exception {
 
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 

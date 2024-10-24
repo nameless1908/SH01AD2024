@@ -3,12 +3,15 @@ package com.example.snapheal.service;
 import com.example.snapheal.dtos.LoginUserDto;
 import com.example.snapheal.dtos.RegisterUserDto;
 import com.example.snapheal.entities.User;
+import com.example.snapheal.exceptions.DataNotFoundException;
 import com.example.snapheal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -30,8 +33,14 @@ public class AuthenticationService {
         return userRepository.save(user);
     }
 
-    public User authenticate(LoginUserDto input) {
-        User user = userRepository.findByEmail(input.getEmail()).orElseThrow();
+    public User authenticate(LoginUserDto input) throws Exception {
+        User user = userRepository.findByEmail(input.getEmail())
+                .orElseThrow(
+                     () ->  new DataNotFoundException("User not found for email: " + input.getEmail())
+                );
+        if (!Objects.equals(user.getPassword(), input.getPassword())) {
+            throw new DataNotFoundException("Password not correct!");
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getUsername(),
