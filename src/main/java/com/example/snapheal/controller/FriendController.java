@@ -1,5 +1,7 @@
 package com.example.snapheal.controller;
 
+import com.example.snapheal.responses.ResponseObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,7 @@ public class FriendController {
 
     // API để lấy toàn bộ danh sách bạn bè của người dùng theo ID
     @GetMapping("")
-    public ResponseEntity<List<User>> getAllFriends() {
+    public ResponseEntity<ResponseObject> getAllFriends() {
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
@@ -29,11 +31,17 @@ public class FriendController {
         List<User> friends = friendService.getAllFriends(userId);
         
         // Trả về danh sách bạn bè nếu tìm thấy, nếu không trả về 404
-        if (friends.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+//        if (friends.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
         
-        return ResponseEntity.ok(friends);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .status(HttpStatus.OK)
+                        .message("Successfully!")
+                        .data(friends)
+                        .build()
+        );
     }
 
     // API để tìm kiếm bạn bè theo tên

@@ -15,6 +15,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError().body(
                 ResponseObject.builder()
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .message(exception.getMessage())
                         .build()
         );
@@ -26,18 +27,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 ResponseObject.builder()
                         .status(HttpStatus.UNAUTHORIZED)
+                        .code(HttpStatus.UNAUTHORIZED.value())
                         .message(ex.getMessage())
                         .data(null)
                         .build()
         );
     }
 
-    @ExceptionHandler(DataNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<ResponseObject> handleDataNotFoundException(DataNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+    @ExceptionHandler(CustomErrorException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ResponseObject> handleDataNotFoundException(CustomErrorException ex) {
+        return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseObject.builder()
-                        .status(HttpStatus.NOT_FOUND)
+                        .status(HttpStatus.OK)
+                        .code(2300)
                         .message(ex.getMessage())
                         .data(null) // hoặc có thể trả về dữ liệu liên quan
                         .build()

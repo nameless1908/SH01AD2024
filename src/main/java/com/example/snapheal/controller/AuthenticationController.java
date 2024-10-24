@@ -41,15 +41,16 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseObject> register(@RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<ResponseObject> register(@RequestBody RegisterUserDto registerUserDto) throws Exception {
         User registeredUser = authenticationService.signup(registerUserDto);
 
         return ResponseEntity.ok(
                 ResponseObject.builder()
-                .message("Register successfully!")
-                .status(HttpStatus.OK)
-                .data(registeredUser)
-                .build()
+                        .message("Register successfully!")
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(true)
+                        .build()
         );
     }
 
@@ -75,6 +76,7 @@ public class AuthenticationController {
                 ResponseObject.builder()
                         .data(loginResponse)
                         .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
                         .message("Successfully!")
                         .build()
         );
@@ -98,6 +100,7 @@ public class AuthenticationController {
                 ResponseObject.builder()
                         .message("Successfully!")
                         .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
                         .data(loginResponse)
                         .build()
         );

@@ -3,7 +3,7 @@ package com.example.snapheal.service;
 import com.example.snapheal.dtos.LoginUserDto;
 import com.example.snapheal.dtos.RegisterUserDto;
 import com.example.snapheal.entities.User;
-import com.example.snapheal.exceptions.DataNotFoundException;
+import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,7 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -22,7 +22,17 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    public User signup(RegisterUserDto input) {
+    public User signup(RegisterUserDto input) throws Exception {
+        Optional<User> emailExist = userRepository.findByEmail(input.getEmail());
+        if (emailExist.isPresent()) {
+            throw new CustomErrorException("Email exist!");
+        }
+
+        Optional<User> usernameExist = userRepository.findByUsername(input.getUsername());
+        if (usernameExist.isPresent()) {
+            throw new CustomErrorException("Username exist!");
+        }
+
         User user = User.builder()
                 .username(input.getUsername())
                 .fullName(input.getFullName())
@@ -36,10 +46,10 @@ public class AuthenticationService {
     public User authenticate(LoginUserDto input) throws Exception {
         User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow(
-                     () ->  new DataNotFoundException("User not found for email: " + input.getEmail())
+                     () ->  new CustomErrorException("User not found for email: " + input.getEmail())
                 );
         if (!passwordEncoder.matches(input.getPassword(), user.getPassword())) {
-            throw new DataNotFoundException("Password not correct!");
+            throw new CustomErrorException("Password not correct!");
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

@@ -13,5 +13,6 @@ import org.springframework.http.HttpStatus;
 public class ResponseObject {
     private String message;
     private HttpStatus status;
+    private int code;
     private Object data;
 }
