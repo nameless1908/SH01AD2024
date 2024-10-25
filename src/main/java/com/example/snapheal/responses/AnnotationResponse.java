@@ -20,6 +20,6 @@ public class AnnotationResponse {
     private String address;
     private String thumbnail;
     private FriendResponse owner;
-    private Timestamp createAt;
-    private Timestamp updateAt;
+    private Long createAt;
+    private Long updateAt;
 }

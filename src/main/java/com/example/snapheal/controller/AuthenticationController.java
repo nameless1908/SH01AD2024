@@ -70,6 +70,7 @@ public class AuthenticationController {
                 .avatar(authenticatedUser.getAvatar())
                 .token(jwtToken)
                 .refreshToken(refreshToken.getRefreshToken())
+                .tokenType("Bearer ")
                 .build();
 
         return ResponseEntity.ok(
@@ -94,6 +95,7 @@ public class AuthenticationController {
                 .avatar(userDetails.getAvatar())
                 .token(token.getToken())
                 .refreshToken(token.getRefreshToken())
+                .tokenType("Bearer ")
                 .build();
 
         return ResponseEntity.ok(

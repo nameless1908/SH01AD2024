@@ -41,8 +41,8 @@ public class Annotation {
                 .address(address)
                 .thumbnail(thumbnail)
                 .owner(owner.mapToFriendResponse())
-                .createAt(new Timestamp(createAt.getTime()))
-                .updateAt(new Timestamp(updateAt.getTime()))
+                .createAt(createAt.getTime())
+                .updateAt(updateAt.getTime())
                 .build();
     }
 }

@@ -12,5 +12,5 @@ import java.sql.Timestamp;
 public class PhotoResponse {
     private Long id;
     private String photoUrl;
-    private Timestamp createAt;
+    private Long createAt;
 }

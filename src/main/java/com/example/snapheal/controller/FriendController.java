@@ -1,5 +1,7 @@
 package com.example.snapheal.controller;
 
+import com.example.snapheal.entities.Friend;
+import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.ResponseObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -14,21 +16,21 @@ import com.example.snapheal.service.FriendService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/friend")
+@RequestMapping("${api.prefix}/friend")
 public class FriendController {
 
     @Autowired
     private FriendService friendService;
 
     // API để lấy toàn bộ danh sách bạn bè của người dùng theo ID
-    @GetMapping("")
+    @GetMapping("/list")
     public ResponseEntity<ResponseObject> getAllFriends() {
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
 
         
-        List<User> friends = friendService.getAllFriends(userId);
+        List<FriendResponse> friends = friendService.getAllFriends(userId);
         
         // Trả về danh sách bạn bè nếu tìm thấy, nếu không trả về 404
 //        if (friends.isEmpty()) {

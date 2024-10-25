@@ -1,8 +1,11 @@
 package com.example.snapheal.entities;
+import com.example.snapheal.responses.FriendResponse;
+import com.example.snapheal.responses.PhotoResponse;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Date;
 
 @Entity
 @Data
@@ -26,4 +29,12 @@ public class Photo {
     @JoinColumn(name = "create_by")
     private User createBy;
     private Date createAt;
+
+    public PhotoResponse mapToPhotoResponse() {
+        return PhotoResponse.builder()
+                .id(id)
+                .photoUrl(photoUrl)
+                .createAt(createAt.getTime())
+                .build();
+    }
 }
