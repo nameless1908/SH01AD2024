@@ -38,8 +38,10 @@ public class AnnotationService {
     @Autowired
     private PhotoService photoService;
 
-    public List<AnnotationResponse> getList(Long userId) {
-        List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userId);
+    public List<AnnotationResponse> getList() {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userDetails.getId());
         return annotations.stream().map(Annotation::mapToAnnotationResponse).collect(Collectors.toList());
     }
 

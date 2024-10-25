@@ -19,8 +19,8 @@ public class AnnotationController {
     private AnnotationService annotationService;
 
     @GetMapping("/list")
-    public ResponseEntity<ResponseObject> getListAnnotation(@RequestParam Long userId) {
-        List<AnnotationResponse> annotations = annotationService.getList(userId);
+    public ResponseEntity<ResponseObject> getListAnnotation() {
+        List<AnnotationResponse> annotations = annotationService.getList();
 
         return  ResponseEntity.ok(
             ResponseObject.builder()
