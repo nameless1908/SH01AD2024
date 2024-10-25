@@ -20,10 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,18 +88,25 @@ public class AnnotationService {
     }
 
     public AnnotationDetailResponse getDetail(Long annotationId) {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         Annotation annotation = annotationRepository.findById(annotationId).orElseThrow(
                 () -> new CustomErrorException("Can not found Annotation with id: " + annotationId)
         );
 
-        List<FriendResponse> friendTagged = annotationTagService.getListAnnotationTagByAnnotationId(annotationId);
-
         List<PhotoResponse> photoResponses = photoService.getPhotosByAnnotationId(annotationId);
 
-        return AnnotationDetailResponse.builder()
+        AnnotationDetailResponse response = AnnotationDetailResponse.builder()
                 .info(annotation.mapToAnnotationResponse())
-                .friendTagged(friendTagged)
                 .photos(photoResponses)
                 .build();
+        if (Objects.equals(annotation.getOwner().getId(), userDetails.getId())) {
+            List<FriendResponse> friendTagged = annotationTagService.getListAnnotationTagByAnnotationId(annotationId);
+            response.setFriendTagged(friendTagged);
+        } else {
+            response.setFriendTagged(new ArrayList<>());
+        }
+
+        return response;
     }
 }
