@@ -15,8 +15,8 @@ public class AnnotationDto {
     private String title;
     private String name;
     private String address;
-    private Long latitude;
-    private Long longitude;
+    private double latitude;
+    private double longitude;
     private List<Long> taggedIds;
     private List<String> images;
 }

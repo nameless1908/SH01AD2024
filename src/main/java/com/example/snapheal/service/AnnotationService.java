@@ -13,9 +13,12 @@ import com.example.snapheal.responses.AnnotationDetailResponse;
 import com.example.snapheal.responses.AnnotationResponse;
 import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.PhotoResponse;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -24,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class AnnotationService {
 
     @Autowired
@@ -37,14 +41,14 @@ public class AnnotationService {
 
     @Autowired
     private PhotoService photoService;
-
+    @PersistenceContext
+    private EntityManager entityManager;
     public List<AnnotationResponse> getList() {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userDetails.getId());
         return annotations.stream().map(Annotation::mapToAnnotationResponse).collect(Collectors.toList());
     }
-
+    @Transactional
     public boolean createAnnotation(AnnotationDto annotationDto) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 

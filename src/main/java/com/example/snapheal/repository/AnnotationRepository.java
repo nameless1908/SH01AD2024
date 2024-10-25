@@ -11,10 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface AnnotationRepository extends JpaRepository<Annotation, Long> {
-
-    @Query("SELECT a FROM Annotation a " +
-            "JOIN AnnotationTag at ON at.annotation.id = a.id " +
+    @Query("SELECT DISTINCT a FROM Annotation a " +
+            "LEFT JOIN AnnotationTag at ON at.annotation.id = a.id " +
             "WHERE a.owner.id = :userId " +
-            "AND at.taggedUser.id = :userId")
+            "OR at.taggedUser.id = :userId")
     List<Annotation> findAnnotationsByOwnerIdAndTaggedUserId(@Param("userId") Long userId);
 }
