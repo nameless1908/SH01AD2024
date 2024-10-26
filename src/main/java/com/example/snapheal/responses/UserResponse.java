@@ -16,13 +16,4 @@ public class UserResponse {
 	private String fullname;
 	private String avatar;
 	private String status;
-	
-	public static UserResponse fromUser(User user, String status) {
-		UserResponse userResponse = new UserResponse();
-		userResponse.setUsername(user.getUsername());
-		userResponse.setFullname(user.getFullName());
-		userResponse.setAvatar(user.getAvatar());
-		userResponse.setStatus(status);
-        return userResponse;
-	}
 }

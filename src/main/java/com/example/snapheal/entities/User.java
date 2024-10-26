@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.example.snapheal.responses.FriendRequestResponse;
 import com.example.snapheal.responses.FriendResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -86,6 +87,15 @@ public class User implements UserDetails {
 				.avatar(avatar)
 				.username(username)
 				.fullName(fullName)
+				.build();
+	}
+	
+	public FriendRequestResponse mapToFriendRequestResponse() {
+		return FriendRequestResponse.builder()
+				.id(id)
+				.avatar(avatar)
+				.username(username)
+				.fullname(fullName)
 				.build();
 	}
 }

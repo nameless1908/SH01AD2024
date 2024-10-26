@@ -1,5 +1,6 @@
 package com.example.snapheal.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRepository;
 import com.example.snapheal.repository.FriendRequestRepository;
 import com.example.snapheal.repository.UserRepository;
+import com.example.snapheal.responses.FriendRequestResponse;
 
 @Service
 public class FriendRequestService {
@@ -75,7 +77,9 @@ public class FriendRequestService {
     }
     
     // Lấy danh sách lời mời kết bạn
-    public List<User> findPendingFriendRequests(Long userId) {
-        return friendRequestRepository.findPendingFriendRequests(userId);
+    public List<FriendRequestResponse> findFriendRequests(Long userId) {
+    	List<User> list = new ArrayList<>();
+    	list.addAll(friendRequestRepository.findPendingFriendRequests(userId));
+        return list.stream().map(User::mapToFriendRequestResponse).toList();
     }
 }

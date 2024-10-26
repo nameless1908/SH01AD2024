@@ -47,7 +47,8 @@ public class FriendController {
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .status(HttpStatus.OK)
-                        .message("Successfully!")
+                        .code(HttpStatus.OK.value())
+                        .message("Get list friend Successfully!")
                         .data(friends)
                         .build()
         );
@@ -59,16 +60,13 @@ public class FriendController {
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
-
-        
-        List<User> friends = friendService.searchFriends(userId, searchTerm);
-        List<FriendResponse> friendResponses = friends.stream()
-        		.map(User::mapToFriendResponse)
-        		.collect(Collectors.toList());
+      
+        List<FriendResponse> friendResponses = friendService.searchFriends(userId, searchTerm);
 		
         return ResponseEntity.ok(
         		ResponseObject.builder()
         			.status(HttpStatus.OK)
+        			.code(HttpStatus.OK.value())
         			.message("Find friend successfully")
         			.data(friendResponses)
         			.build()
@@ -88,6 +86,7 @@ public class FriendController {
         return ResponseEntity.ok(
         		ResponseObject.builder()
         			.status(HttpStatus.NO_CONTENT)
+        			.code(HttpStatus.NO_CONTENT.value())
         			.message("Friend deleted successfully")
         			.data(null)
         			.build()

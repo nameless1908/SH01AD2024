@@ -4,8 +4,11 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.example.snapheal.dtos.UpdateUserDto;
 import com.example.snapheal.entities.RefreshToken;
+import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.exceptions.TokenInvalidException;
 import com.example.snapheal.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.UserRepository;
+import com.example.snapheal.responses.UserResponse;
 
 @Service
 public class UserService {
@@ -27,10 +31,48 @@ public class UserService {
         return userRepository.findById(id);
     }
 	
-	public List<Object[]> searchUserWithFriendRequestStatus(Long currentUserId, String searchTerm) {
-	    return userRepository.searchUsersWithFriendStatus(currentUserId, searchTerm);
+	public List<UserResponse> searchUserWithFriendRequestStatus(Long currentUserId, String searchTerm) {
+	    List<Object[]> list = userRepository.searchUsersWithFriendStatus(currentUserId, searchTerm);
+	    List<UserResponse> userResponses = list.stream()
+	            .map(result -> {
+	                return new UserResponse(
+	                    (String) result[7], // username
+	                    (String) result[4], // fullname
+	                    (String) result[1], // avatar
+	                    (String) result[8]  // status 
+	                );
+	            })
+	            .collect(Collectors.toList());
+	    return userResponses;
+	}
+	
+	public void updateUser(UpdateUserDto dto) {
+	    User user = userRepository.findById(dto.getId()).orElseThrow(
+	            () -> new CustomErrorException("Can not found User with id: " + dto.getId())
+	    );
+
+	    
+	    if (!user.getUsername().equals(dto.getUsername())) {
+	        Optional<User> existingUser = userRepository.findByUsername(dto.getUsername());
+	        if (existingUser.isPresent()) {
+	            throw new CustomErrorException("Username already exists");
+	        }
+	        user.setUsername(dto.getUsername());
+	    }
+	    
+	    if (user.getEmail().equals(dto.getEmail())) {
+            throw new CustomErrorException("Email exist");
+        }
+
+	    user.setFullName(dto.getFullname());
+	    user.setEmail(dto.getEmail());
+	    user.setAvatar(dto.getAvatar());
+
+	    
+	    userRepository.save(user);
 	}
 
+	
 	public User getUserDetailsFromToken(String token) throws Exception {
 		String username = jwtService.extractUsername(token);
 		return  userRepository.findByUsername(username).orElseThrow(

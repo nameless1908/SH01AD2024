@@ -2,8 +2,6 @@ package com.example.snapheal.controller;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,29 +12,30 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.snapheal.entities.FriendRequest;
 import com.example.snapheal.entities.User;
-import com.example.snapheal.repository.FriendRequestRepository;
 import com.example.snapheal.responses.FriendRequestResponse;
 import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.service.FriendRequestService;
 
 @RestController
-@RequestMapping("/request")
+@RequestMapping("${api.prefix}/request")
 public class FriendRequestController {
 
     @Autowired
     private FriendRequestService friendRequestService;
 
     // API để gửi yêu cầu kết bạn
-    @PostMapping("")
+    @PostMapping("/create-friend")
     public ResponseEntity<ResponseObject> createFriendRequest(@RequestParam Long receiverId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User requester = (User) authentication.getPrincipal();     
         User receiver = friendRequestService.findById(receiverId);
 
         FriendRequest friendRequest = friendRequestService.createFriendRequest(requester, receiver);
+        
         return ResponseEntity.ok(
         		ResponseObject.builder()
         		.status(HttpStatus.OK)
+        		.code(HttpStatus.OK.value())
         		.message("Created friend successfully")
         		.data(friendRequest)
         		.build()
@@ -51,6 +50,7 @@ public class FriendRequestController {
         return ResponseEntity.ok(
         		ResponseObject.builder()
         		.status(HttpStatus.OK)
+        		.code(HttpStatus.OK.value())
         		.message("Friend request accepted successfully")
         		.data(friendRequestOpt)
         		.build()
@@ -66,6 +66,7 @@ public class FriendRequestController {
         return ResponseEntity.ok(
         		ResponseObject.builder()
         		.status(HttpStatus.OK)
+        		.code(HttpStatus.OK.value())
         		.message("Friend request rejected successfully")
         		.data(friendRequestOpt)
         		.build()
@@ -77,14 +78,13 @@ public class FriendRequestController {
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
-        List<User> pendingRequests = friendRequestService.findPendingFriendRequests(userId);
-        List<FriendRequestResponse> friendRequestResponses = pendingRequests.stream()
-        		.map(FriendRequestResponse::fromUser)
-        		.collect(Collectors.toList());
+        
+        List<FriendRequestResponse> friendRequestResponses = friendRequestService.findFriendRequests(userId);
        
         	return ResponseEntity.ok(
         		ResponseObject.builder()
         		.status(HttpStatus.OK)
+        		.code(HttpStatus.OK.value())
         		.message("Friend requests retrieved successfully")
         		.data(friendRequestResponses)
         		.build()

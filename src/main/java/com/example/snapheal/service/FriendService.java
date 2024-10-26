@@ -22,8 +22,10 @@ public class FriendService {
 
 
     // Tìm kiếm bạn bè
-    public List<User> searchFriends(Long userId, String searchTerm) {
-        return friendRepository.findFriendsBySearch(userId, searchTerm);
+    public List<FriendResponse> searchFriends(Long userId, String searchTerm) {
+    	List<User> friends = new ArrayList<>();
+    	friends.addAll(friendRepository.findFriendsBySearch(userId, searchTerm));
+        return friends.stream().map(User::mapToFriendResponse).toList();
     }
     
     // Lấy toàn bộ danh sách bạn bè của người dùng theo ID
