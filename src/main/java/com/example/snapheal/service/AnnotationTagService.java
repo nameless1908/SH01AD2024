@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AnnotationTagService {
@@ -24,7 +23,11 @@ public class AnnotationTagService {
         return users.stream().map(User::mapToFriendResponse).toList();
     }
 
-    public AnnotationTag save(AnnotationTag annotationTag) {
-        return annotationTagRepository.save(annotationTag);
+    public void save(AnnotationTag annotationTag) {
+        annotationTagRepository.save(annotationTag);
+    }
+
+    public void delete(Long id) {
+        annotationTagRepository.deleteByTaggedUserId(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.snapheal.service;
 
 import com.example.snapheal.dtos.AnnotationDto;
+import com.example.snapheal.dtos.UpdateFriendAnnotationDto;
 import com.example.snapheal.entities.Annotation;
 import com.example.snapheal.entities.AnnotationTag;
 import com.example.snapheal.entities.Photo;
@@ -108,5 +109,26 @@ public class AnnotationService {
         }
 
         return response;
+    }
+
+    public void updateFriendTagged(UpdateFriendAnnotationDto dto) {
+        Annotation annotation = annotationRepository.findById(dto.getAnnotationId()).orElseThrow(
+                () -> new CustomErrorException("Can not found Annotation with id: " + dto.getAnnotationId())
+        );
+        List<FriendResponse> friendTagged = annotationTagService.getListAnnotationTagByAnnotationId(dto.getAnnotationId());
+        for (FriendResponse friendResponse: friendTagged) {
+            annotationTagService.delete(friendResponse.getId());
+        }
+
+        for (FriendResponse friendResponse: dto.getNewFriends()) {
+            User user = userService.findUserById(friendResponse.getId()).orElseThrow(
+                    () -> new CustomErrorException("Can not found User with id: " + friendResponse.getId())
+            );
+            AnnotationTag newAnnotationTag = AnnotationTag.builder()
+                    .taggedUser(user)
+                    .annotation(annotation)
+                    .build();
+            annotationTagService.save(newAnnotationTag);
+        }
     }
 }
