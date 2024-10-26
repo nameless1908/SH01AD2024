@@ -1,8 +1,22 @@
 package com.example.snapheal.entities;
 
-import jakarta.persistence.*;
+import java.util.Date;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Data
+@Getter
+@Setter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LocationTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,34 +29,4 @@ public class LocationTag {
     @ManyToOne
     @JoinColumn(name = "tagged_user_id")
     private User taggedUser;
-
-	public LocationTag(Location location, User taggedUser) {
-		super();
-		this.location = location;
-		this.taggedUser = taggedUser;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Location getLocation() {
-		return location;
-	}
-
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-
-	public User getTaggedUser() {
-		return taggedUser;
-	}
-
-	public void setTaggedUser(User taggedUser) {
-		this.taggedUser = taggedUser;
-	}
 }

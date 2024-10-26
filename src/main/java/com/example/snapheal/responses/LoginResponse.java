@@ -8,7 +8,6 @@ import lombok.*;
 @Setter
 @Data
 @Builder
-
 public class LoginResponse {
     private String token;
     private long expiresIn;

@@ -31,14 +31,14 @@ public class AuthenticationService {
     }
 
     public User authenticate(LoginUserDto input) {
+        User user = userRepository.findByEmail(input.getEmail()).orElseThrow();
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        input.getEmail(),
+                        user.getUsername(),
                         input.getPassword()
                 )
         );
 
-        return userRepository.findByEmail(input.getEmail())
-                .orElseThrow();
+        return user;
     }
 }

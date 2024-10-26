@@ -48,11 +48,6 @@ public class User implements UserDetails {
 	@Column(name = "updated_at")
 	private Date updatedAt;
 
-    @Override
-	public String getUsername() {
-		return username;
-	}
-
 	@Override
 	public boolean isAccountNonExpired() {
 		return UserDetails.super.isAccountNonExpired();
@@ -76,10 +71,5 @@ public class User implements UserDetails {
     @Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return List.of();
-	}
-
-	@Override
-	public String getPassword() {
-		return password;
 	}
 }

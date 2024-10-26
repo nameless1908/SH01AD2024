@@ -28,11 +28,6 @@ public class FriendService {
     public List<User> getAllFriends(Long userId) {
         return friendRepository.findFriendsByUserId(userId);
     }
-    
- // Lấy tất cả bạn bè
-    public List<Friend> getAllFriends() {
-        return friendRepository.findAll();
-    }
 
     // Lấy bạn bè theo ID
     public Optional<Friend> getFriendById(Long id) {
