@@ -2,8 +2,11 @@ package com.example.snapheal.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import com.example.snapheal.entities.FriendRequest;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRequestRepository;
+import com.example.snapheal.responses.FriendRequestResponse;
+import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.service.FriendRequestService;
 
 @RestController
@@ -20,49 +25,70 @@ public class FriendRequestController {
 
     @Autowired
     private FriendRequestService friendRequestService;
-    
-    @Autowired
-    private FriendRequestRepository friendRequestRepository;
 
     // API để gửi yêu cầu kết bạn
     @PostMapping("")
-    public ResponseEntity<FriendRequest> createFriendRequest(@RequestParam Long receiverId) {
-        // Lấy thông tin người dùng hiện tại từ SecurityContext
+    public ResponseEntity<ResponseObject> createFriendRequest(@RequestParam Long receiverId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User requester = (User) authentication.getPrincipal();
-
-        // Tìm người nhận dựa trên ID
+        User requester = (User) authentication.getPrincipal();     
         User receiver = friendRequestService.findById(receiverId);
-        
-        if (requester == null || receiver == null) {
-            return ResponseEntity.badRequest().build();  // Nếu người dùng không tồn tại
-        }
 
-        // Gửi yêu cầu kết bạn
         FriendRequest friendRequest = friendRequestService.createFriendRequest(requester, receiver);
-        return ResponseEntity.ok(friendRequest);
+        return ResponseEntity.ok(
+        		ResponseObject.builder()
+        		.status(HttpStatus.OK)
+        		.message("Created friend successfully")
+        		.data(friendRequest)
+        		.build()
+        		);
     }
     
     // API để chấp nhận yêu cầu kết bạn
     @PutMapping("/accept")
-    public ResponseEntity<FriendRequest> acceptFriendRequest(@RequestParam Long requestId) {
+    public ResponseEntity<ResponseObject> acceptFriendRequest(@RequestParam Long requestId) {
     	Optional<FriendRequest> friendRequestOpt = friendRequestService.acceptFriendRequest(requestId);
 
-        return friendRequestOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(
+        		ResponseObject.builder()
+        		.status(HttpStatus.OK)
+        		.message("Friend request accepted successfully")
+        		.data(friendRequestOpt)
+        		.build()
+        		);
     }
-
+    
     // API để từ chối yêu cầu kết bạn
     @PutMapping("/reject")
-    public ResponseEntity<FriendRequest> rejectFriendRequest(@RequestParam Long requestId) {
+    public ResponseEntity<ResponseObject> rejectFriendRequest(@RequestParam Long requestId) {
+    	
     	Optional<FriendRequest> friendRequestOpt = friendRequestService.rejectFriendRequest(requestId);
 
-        return friendRequestOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(
+        		ResponseObject.builder()
+        		.status(HttpStatus.OK)
+        		.message("Friend request rejected successfully")
+        		.data(friendRequestOpt)
+        		.build()
+        		);
     }
     
     @GetMapping("/invite")
-    public ResponseEntity<List<User>> getPendingFriendRequests(@RequestParam Long userId) {
+    public ResponseEntity<ResponseObject> getPendingFriendRequests() {
+    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
         List<User> pendingRequests = friendRequestService.findPendingFriendRequests(userId);
-        return ResponseEntity.ok(pendingRequests);
+        List<FriendRequestResponse> friendRequestResponses = pendingRequests.stream()
+        		.map(FriendRequestResponse::fromUser)
+        		.collect(Collectors.toList());
+       
+        	return ResponseEntity.ok(
+        		ResponseObject.builder()
+        		.status(HttpStatus.OK)
+        		.message("Friend requests retrieved successfully")
+        		.data(friendRequestResponses)
+        		.build()
+        		);
     }
 }
 

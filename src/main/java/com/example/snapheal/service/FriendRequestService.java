@@ -49,7 +49,7 @@ public class FriendRequestService {
 
     // Chấp nhận yêu cầu kết bạn
     public Optional<FriendRequest> acceptFriendRequest(Long requestId) {
-        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findById(requestId);
+        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findByRequesterId(requestId);
 
         if (friendRequestOpt.isPresent()) {
             FriendRequest friendRequest = friendRequestOpt.get();
@@ -64,7 +64,7 @@ public class FriendRequestService {
 
     // Từ chối yêu cầu kết bạn
     public Optional<FriendRequest> rejectFriendRequest(Long requestId) {
-        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findById(requestId);
+        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findByRequesterId(requestId);
 
         if (friendRequestOpt.isPresent()) {
             FriendRequest friendRequest = friendRequestOpt.get();

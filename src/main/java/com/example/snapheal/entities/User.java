@@ -49,11 +49,6 @@ public class User implements UserDetails {
 	@Column(name = "updated_at")
 	private Date updatedAt;
 
-    @Override
-	public String getUsername() {
-		return username;
-	}
-
 	@Override
 	public boolean isAccountNonExpired() {
 		return UserDetails.super.isAccountNonExpired();

@@ -33,11 +33,6 @@ public class FriendService {
         friends.addAll(friendRepository.findFriendsWhereUserIsFriend(userId));
         return friends.stream().map(User::mapToFriendResponse).toList();
     }
-    
- // Lấy tất cả bạn bè
-    public List<Friend> getAllFriends() {
-        return friendRepository.findAll();
-    }
 
     // Lấy bạn bè theo ID
     public Optional<Friend> getFriendById(Long id) {

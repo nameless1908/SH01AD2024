@@ -22,7 +22,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     List<User> findFriendsWhereUserIsFriend(@Param("userId") Long userId);
 
     //Tìm kiếm bạn bè
-    @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId AND f.friend.username LIKE %:searchTerm%")
+    @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId AND (f.friend.username LIKE %:searchTerm% OR f.friend.fullName LIKE %:searchTerm%)")
     List<User> findFriendsBySearch(@Param("userId") Long userId, @Param("searchTerm") String searchTerm);
     
     void deleteByUserIdAndFriendId(Long userId, Long friendId);

@@ -1,7 +1,10 @@
 package com.example.snapheal.entities;
 
-import com.example.snapheal.responses.FriendResponse;
+import java.util.Date;
+
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,23 +14,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@Builder
 @NoArgsConstructor
-public class Friend {
+@AllArgsConstructor
+public class LocationTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "location_id")
+    private Location location;
 
     @ManyToOne
-    @JoinColumn(name = "friend_id")
-    private User friend;
-
-	public Friend(User user, User friend) {
-		super();
-		this.user = user;
-		this.friend = friend;
-	}
+    @JoinColumn(name = "tagged_user_id")
+    private User taggedUser;
 }

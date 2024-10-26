@@ -6,14 +6,21 @@ import com.example.snapheal.responses.ResponseObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.snapheal.entities.User;
+import com.example.snapheal.responses.FriendResponse;
+import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.service.FriendService;
 
+import jakarta.persistence.criteria.From;
+
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("${api.prefix}/friend")
@@ -45,28 +52,32 @@ public class FriendController {
                         .build()
         );
     }
-
+    
     // API để tìm kiếm bạn bè theo tên
     @GetMapping("/search")
-    public ResponseEntity<List<User>> searchFriends(@RequestParam String searchTerm) {
+    public ResponseEntity<ResponseObject> searchFriends(@RequestParam String searchTerm) {
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
 
         
         List<User> friends = friendService.searchFriends(userId, searchTerm);
-        
-        // Trả về danh sách nếu có, nếu không trả về 404
-        if (friends.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        return ResponseEntity.ok(friends);
+        List<FriendResponse> friendResponses = friends.stream()
+        		.map(User::mapToFriendResponse)
+        		.collect(Collectors.toList());
+		
+        return ResponseEntity.ok(
+        		ResponseObject.builder()
+        			.status(HttpStatus.OK)
+        			.message("Find friend successfully")
+        			.data(friendResponses)
+        			.build()
+        		);
     }
 
     // API để xóa bạn bè
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteFriend(@RequestParam Long friendId) {
+    public ResponseEntity<ResponseObject> deleteFriend(@RequestParam Long friendId) {
         
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
@@ -74,6 +85,12 @@ public class FriendController {
 
         friendService.deleteFriend(userId, friendId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(
+        		ResponseObject.builder()
+        			.status(HttpStatus.NO_CONTENT)
+        			.message("Friend deleted successfully")
+        			.data(null)
+        			.build()
+        			);
     }
 }
