@@ -1,5 +1,6 @@
 package com.example.snapheal.service;
 
+import com.example.snapheal.responses.FriendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import com.example.snapheal.repository.FriendRepository;
 
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,8 +27,11 @@ public class FriendService {
     }
     
     // Lấy toàn bộ danh sách bạn bè của người dùng theo ID
-    public List<User> getAllFriends(Long userId) {
-        return friendRepository.findFriendsByUserId(userId);
+    public List<FriendResponse> getAllFriends(Long userId) {
+        List<User> friends = new ArrayList<>();
+        friends.addAll(friendRepository.findFriendsWhereUserIsUser(userId));
+        friends.addAll(friendRepository.findFriendsWhereUserIsFriend(userId));
+        return friends.stream().map(User::mapToFriendResponse).toList();
     }
 
     // Lấy bạn bè theo ID

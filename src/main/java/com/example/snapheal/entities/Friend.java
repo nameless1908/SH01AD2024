@@ -1,5 +1,6 @@
 package com.example.snapheal.entities;
 
+import com.example.snapheal.responses.FriendResponse;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;

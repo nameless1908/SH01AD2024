@@ -11,10 +11,16 @@ import java.util.List;
 
 public interface FriendRepository extends JpaRepository<Friend, Long> {
 
-    // Lấy danh sách bạn bè 
-    @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId OR f.friend.id = :userId")
-    List<User> findFriendsByUserId(@Param("userId") Long userId);
-    
+    // Lấy danh sách bạn bè của một người dùng dựa trên ID của người dùng đó
+//    @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId OR f.friend.id = :userId" )
+//    List<User> findFriendsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId")
+    List<User> findFriendsWhereUserIsUser(@Param("userId") Long userId);
+
+    @Query("SELECT f.user FROM Friend f WHERE f.friend.id = :userId")
+    List<User> findFriendsWhereUserIsFriend(@Param("userId") Long userId);
+
     //Tìm kiếm bạn bè
     @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId AND (f.friend.username LIKE %:searchTerm% OR f.friend.fullName LIKE %:searchTerm%)")
     List<User> findFriendsBySearch(@Param("userId") Long userId, @Param("searchTerm") String searchTerm);

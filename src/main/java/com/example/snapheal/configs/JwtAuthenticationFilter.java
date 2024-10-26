@@ -1,10 +1,21 @@
 package com.example.snapheal.configs;
 
+import com.example.snapheal.entities.RefreshToken;
+import com.example.snapheal.exceptions.TokenInvalidException;
+import com.example.snapheal.repository.RefreshTokenRepository;
+import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.service.JwtService;
+import com.example.snapheal.service.RefreshTokenService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
@@ -53,10 +66,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String username = jwtService.extractUsername(jwt);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
             if (username != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                RefreshToken refreshToken = refreshTokenRepository.findByToken(jwt).orElseThrow(
+                        () -> new TokenInvalidException("Token not found!")
+                );
 
+                if (refreshToken.isRevoked()) {
+                    throw new TokenInvalidException("Access token is invalid because its refresh token has been revoked!");
+                }
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -70,8 +88,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             filterChain.doFilter(request, response);
-        } catch (Exception exception) {
-            handlerExceptionResolver.resolveException(request, response, null, exception);
+        } catch (ExpiredJwtException e) {
+            // Send response with error message directly if the token is expired
+            handleException(response, "Token has expired");
+        } catch (JwtException e) {
+            // Send response with error message directly for other JWT issues
+            handleException(response, "Invalid token");
+        } catch (Exception e) {
+            // General exception handling
+            handleException(response, e.getMessage());
         }
+    }
+
+    private void handleException(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(new ObjectMapper().writeValueAsString(
+                ResponseObject.builder()
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .message(message)
+                        .data(null)
+                        .build()
+        ));
     }
 }

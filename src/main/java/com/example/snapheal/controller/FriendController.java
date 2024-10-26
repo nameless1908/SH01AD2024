@@ -1,5 +1,9 @@
 package com.example.snapheal.controller;
 
+import com.example.snapheal.entities.Friend;
+import com.example.snapheal.responses.FriendResponse;
+import com.example.snapheal.responses.ResponseObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,30 +23,34 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/friend")
+@RequestMapping("${api.prefix}/friend")
 public class FriendController {
 
     @Autowired
     private FriendService friendService;
 
     // API để lấy toàn bộ danh sách bạn bè của người dùng theo ID
-    @GetMapping("")
+    @GetMapping("/list")
     public ResponseEntity<ResponseObject> getAllFriends() {
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
-        List<User> friends = friendService.getAllFriends(userId);
-        List<FriendResponse> friendResponses = friends.stream()
-                .map(FriendResponse::fromUser)
-                .collect(Collectors.toList());
-            
-            return ResponseEntity.ok(
-                    ResponseObject.builder()
-                            .status(HttpStatus.OK)
-                            .message("Get Friend successfully")
-                            .data(friendResponses)  
-                            .build()
-            ); 
+
+        
+        List<FriendResponse> friends = friendService.getAllFriends(userId);
+        
+        // Trả về danh sách bạn bè nếu tìm thấy, nếu không trả về 404
+//        if (friends.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
+        
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .status(HttpStatus.OK)
+                        .message("Successfully!")
+                        .data(friends)
+                        .build()
+        );
     }
     
     // API để tìm kiếm bạn bè theo tên
@@ -55,7 +63,7 @@ public class FriendController {
         
         List<User> friends = friendService.searchFriends(userId, searchTerm);
         List<FriendResponse> friendResponses = friends.stream()
-        		.map(FriendResponse::fromUser)
+        		.map(User::mapToFriendResponse)
         		.collect(Collectors.toList());
 		
         return ResponseEntity.ok(

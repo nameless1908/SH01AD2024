@@ -47,7 +47,8 @@ public class SecurityConfiguration {
                         // Allow all requests to /auth/signup and /auth/login without authentication
                         .requestMatchers(
                                 String.format("%s/auth/register", apiPrefix),
-                                String.format("%s/auth/login", apiPrefix)
+                                String.format("%s/auth/login", apiPrefix),
+                                String.format("%s/auth/refresh-token", apiPrefix)
                         ).permitAll()
 
                         // Require authentication for any other request

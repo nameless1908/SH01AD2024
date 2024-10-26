@@ -1,4 +1,11 @@
 package com.example.snapheal.entities;
+import com.example.snapheal.responses.FriendResponse;
+import com.example.snapheal.responses.PhotoResponse;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.sql.Timestamp;
+import java.util.Date;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,7 +28,20 @@ public class Photo {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "location_id")
-    private Location location;
-    private String link_photo;	
+    @JoinColumn(name = "annotation_id")
+    private Annotation annotation;
+    private String photoUrl;
+
+    @ManyToOne
+    @JoinColumn(name = "create_by")
+    private User createBy;
+    private Date createAt;
+
+    public PhotoResponse mapToPhotoResponse() {
+        return PhotoResponse.builder()
+                .id(id)
+                .photoUrl(photoUrl)
+                .createAt(createAt.getTime())
+                .build();
+    }
 }
