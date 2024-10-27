@@ -13,6 +13,6 @@ import lombok.Setter;
 public class FriendRequestResponse {
 	private Long id;
 	private String username;
-	private String fullname;
+	private String fullName;
 	private String avatar;
 }

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 public class UserResponse {
 	private String username;
-	private String fullname;
+	private String fullName;
 	private String avatar;
 	private String status;
 }

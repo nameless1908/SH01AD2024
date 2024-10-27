@@ -24,7 +24,7 @@ public class FriendRequestController {
     private FriendRequestService friendRequestService;
 
     // API để gửi yêu cầu kết bạn
-    @PostMapping("/create-friend")
+    @PostMapping("/send")
     public ResponseEntity<ResponseObject> createFriendRequest(@RequestParam Long receiverId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User requester = (User) authentication.getPrincipal();     
@@ -45,14 +45,14 @@ public class FriendRequestController {
     // API để chấp nhận yêu cầu kết bạn
     @PutMapping("/accept")
     public ResponseEntity<ResponseObject> acceptFriendRequest(@RequestParam Long requestId) {
-    	Optional<FriendRequest> friendRequestOpt = friendRequestService.acceptFriendRequest(requestId);
+    	friendRequestService.acceptFriendRequest(requestId);
 
         return ResponseEntity.ok(
         		ResponseObject.builder()
         		.status(HttpStatus.OK)
         		.code(HttpStatus.OK.value())
         		.message("Friend request accepted successfully")
-        		.data(friendRequestOpt)
+        		.data(true)
         		.build()
         		);
     }
@@ -61,19 +61,19 @@ public class FriendRequestController {
     @PutMapping("/reject")
     public ResponseEntity<ResponseObject> rejectFriendRequest(@RequestParam Long requestId) {
     	
-    	Optional<FriendRequest> friendRequestOpt = friendRequestService.rejectFriendRequest(requestId);
+    	friendRequestService.rejectFriendRequest(requestId);
 
         return ResponseEntity.ok(
         		ResponseObject.builder()
         		.status(HttpStatus.OK)
         		.code(HttpStatus.OK.value())
         		.message("Friend request rejected successfully")
-        		.data(friendRequestOpt)
+        		.data(true)
         		.build()
         		);
     }
     
-    @GetMapping("/invite")
+    @GetMapping("/list")
     public ResponseEntity<ResponseObject> getPendingFriendRequests() {
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();

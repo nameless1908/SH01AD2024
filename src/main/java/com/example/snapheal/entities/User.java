@@ -87,6 +87,7 @@ public class User implements UserDetails {
 				.avatar(avatar)
 				.username(username)
 				.fullName(fullName)
+				.status(FriendStatus.ACCEPTED)
 				.build();
 	}
 	
@@ -95,7 +96,7 @@ public class User implements UserDetails {
 				.id(id)
 				.avatar(avatar)
 				.username(username)
-				.fullname(fullName)
+				.fullName(fullName)
 				.build();
 	}
 }
