@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.example.snapheal.responses.FriendResponse;
+import com.example.snapheal.responses.ProfileResponse;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,7 +42,9 @@ public class User implements UserDetails {
 	@Column(nullable = false)
     private String password;
     private String avatar;
-
+    private Double currentLatitude;
+    private Double currentLongitude;
+    
 	@CreationTimestamp
 	@Column(updatable = false, name = "created_at")
 	private Date createdAt;
@@ -80,12 +84,47 @@ public class User implements UserDetails {
 	}
 
 
+	public FriendResponse mapToFriendResponse(FriendStatus status) {
+		return FriendResponse.builder()
+				.id(id)
+				.avatar(avatar)
+				.username(username)
+				.fullName(fullName)
+<<<<<<< Updated upstream
+=======
+				.status(status)
+				.build();
+	}
+	
+	public FriendRequestResponse mapToFriendRequestResponse(FriendStatus status) {
+		return FriendRequestResponse.builder()
+				.id(id)
+				.avatar(avatar)
+				.username(username)
+				.fullName(fullName)
+				.status(status)
+				.build();
+	}
+	
+	public ProfileResponse mapToProfileResponse() {
+		return ProfileResponse.builder()
+				.id(id)
+				.avatar(avatar)
+				.username(username)
+				.fullName(fullName)
+				.email(email)
+				.currentLongitude(currentLongitude)
+				.currentLatitude(currentLatitude)
+				.build();
+	}
+
 	public FriendResponse mapToFriendResponse() {
 		return FriendResponse.builder()
 				.id(id)
 				.avatar(avatar)
 				.username(username)
 				.fullName(fullName)
+>>>>>>> Stashed changes
 				.build();
 	}
 }

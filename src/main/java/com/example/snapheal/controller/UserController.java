@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.snapheal.entities.User;
+import com.example.snapheal.responses.ProfileResponse;
 import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.responses.UserResponse;
 import com.example.snapheal.service.UserService;
@@ -28,7 +29,26 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	
-	// API tìm kiếm người dùng
+	//lấy thông tin người dùng login
+	@GetMapping("/user-login")
+	public ResponseEntity<ResponseObject> getUserLogin(){
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        Long userId = user.getId();
+        
+        List<ProfileResponse> profileResponses = userService.getProfileUser(userId);
+        
+		return ResponseEntity.ok(
+				ResponseObject.builder()
+				.status(HttpStatus.OK)
+				.code(HttpStatus.OK.value())
+				.message("Get infomation user login successfully")
+				.data(profileResponses)
+				.build()
+				);
+	}
+	
+	//tìm kiếm người dùng
 	@GetMapping("/search")
 	public ResponseEntity<ResponseObject> searchUsers(@RequestParam String searchTerm) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

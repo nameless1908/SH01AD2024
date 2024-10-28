@@ -13,6 +13,11 @@ import org.springframework.stereotype.Service;
 
 import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.UserRepository;
+<<<<<<< Updated upstream
+=======
+import com.example.snapheal.responses.ProfileResponse;
+import com.example.snapheal.responses.UserResponse;
+>>>>>>> Stashed changes
 
 @Service
 public class UserService {
@@ -27,9 +32,62 @@ public class UserService {
         return userRepository.findById(id);
     }
 	
+<<<<<<< Updated upstream
 	public List<Object[]> searchUserWithFriendRequestStatus(Long currentUserId, String searchTerm) {
 	    return userRepository.searchUsersWithFriendStatus(currentUserId, searchTerm);
 	}
+=======
+	public List<UserResponse> searchUserWithFriendRequestStatus(Long currentUserId, String searchTerm) {
+	    List<Object[]> list = userRepository.searchUsersWithFriendStatus(currentUserId, searchTerm);
+	    List<UserResponse> userResponses = list.stream()
+	            .map(result -> {
+	                return new UserResponse(
+	                	(Long) result[0],   // id
+	                    (String) result[9], // username
+	                    (String) result[6], // fullname
+	                    (String) result[1], // avatar
+	                    (String) result[10]  // status 
+	                );
+	            })
+	            .collect(Collectors.toList());
+	    return userResponses;
+	}
+	
+	public List<ProfileResponse> getProfileUser(Long userId){
+		Optional<User> users = userRepository.findById(userId);
+		List<ProfileResponse> profileResponses = users.stream()
+				.map(User::mapToProfileResponse).toList();
+		
+		return profileResponses;
+	}
+	
+	public void updateUser(UpdateUserDto dto) {
+	    User user = userRepository.findById(dto.getId()).orElseThrow(
+	            () -> new CustomErrorException("Can not found User with id: " + dto.getId())
+	    );
+
+	    
+	    if (!user.getUsername().equals(dto.getUsername())) {
+	        Optional<User> existingUser = userRepository.findByUsername(dto.getUsername());
+	        if (existingUser.isPresent()) {
+	            throw new CustomErrorException("Username already exists");
+	        }
+	        user.setUsername(dto.getUsername());
+	    }
+	    
+	    if (user.getEmail().equals(dto.getEmail())) {
+            throw new CustomErrorException("Email exist");
+        }
+
+	    user.setFullName(dto.getFullname());
+	    user.setEmail(dto.getEmail());
+	    user.setAvatar(dto.getAvatar());
+
+	    
+	    userRepository.save(user);
+	}
+
+>>>>>>> Stashed changes
 
 	public User getUserDetailsFromToken(String token) throws Exception {
 		String username = jwtService.extractUsername(token);

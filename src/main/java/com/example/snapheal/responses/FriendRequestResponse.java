@@ -1,5 +1,9 @@
 package com.example.snapheal.responses;
+<<<<<<< Updated upstream
 import com.example.snapheal.entities.User;
+=======
+import com.example.snapheal.entities.FriendStatus;
+>>>>>>> Stashed changes
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,6 +18,7 @@ public class FriendRequestResponse {
 	private String username;
 	private String fullname;
 	private String avatar;
+<<<<<<< Updated upstream
 		
 	public static FriendRequestResponse fromUser(User user) {
 		FriendRequestResponse friendRequestResponse = new FriendRequestResponse();
@@ -22,4 +27,7 @@ public class FriendRequestResponse {
 		friendRequestResponse.setAvatar(user.getAvatar());
 		return friendRequestResponse;
 	}
+=======
+	private FriendStatus status;
+>>>>>>> Stashed changes
 }

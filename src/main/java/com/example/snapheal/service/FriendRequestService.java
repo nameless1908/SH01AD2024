@@ -75,7 +75,15 @@ public class FriendRequestService {
     }
     
     // Lấy danh sách lời mời kết bạn
+<<<<<<< Updated upstream
     public List<User> findPendingFriendRequests(Long userId) {
         return friendRequestRepository.findPendingFriendRequests(userId);
+=======
+    public List<FriendRequestResponse> findFriendRequests(Long userId) {
+        List<User> users = friendRequestRepository.findPendingFriendRequests(userId);
+        return users.stream()
+                    .map(user -> user.mapToFriendRequestResponse(FriendStatus.PENDING))
+                    .toList();
+>>>>>>> Stashed changes
     }
 }
