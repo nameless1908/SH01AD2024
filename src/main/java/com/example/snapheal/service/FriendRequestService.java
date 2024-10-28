@@ -1,8 +1,10 @@
 package com.example.snapheal.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.snapheal.exceptions.CustomErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRepository;
 import com.example.snapheal.repository.FriendRequestRepository;
 import com.example.snapheal.repository.UserRepository;
+import com.example.snapheal.responses.FriendRequestResponse;
 
 @Service
 public class FriendRequestService {
@@ -48,42 +51,35 @@ public class FriendRequestService {
     }
 
     // Chấp nhận yêu cầu kết bạn
-    public Optional<FriendRequest> acceptFriendRequest(Long requestId) {
-        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findByRequesterId(requestId);
+    public void acceptFriendRequest(Long requestId) {
+        FriendRequest friendRequestOpt = friendRequestRepository.findByRequesterId(requestId).orElseThrow(
+                () -> new CustomErrorException("Not found requester by requestID")
+        );
 
-        if (friendRequestOpt.isPresent()) {
-            FriendRequest friendRequest = friendRequestOpt.get();
-            friendRequest.setStatus(FriendStatus.ACCEPTED);  // Cập nhật trạng thái
-            friendRequestRepository.save(friendRequest);  // Lưu vào database
-            
-            Friend friend = new Friend(friendRequest.getRequester(), friendRequest.getReceiver());
-            friendRepository.save(friend);
-        }
-        return friendRequestOpt;
+        FriendRequest friendRequest = friendRequestOpt;
+        friendRequest.setStatus(FriendStatus.ACCEPTED);  // Cập nhật trạng thái
+        friendRequestRepository.save(friendRequest);  // Lưu vào database
+
+        Friend friend = new Friend(friendRequest.getRequester(), friendRequest.getReceiver());
+        friendRepository.save(friend);
     }
 
     // Từ chối yêu cầu kết bạn
-    public Optional<FriendRequest> rejectFriendRequest(Long requestId) {
-        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findByRequesterId(requestId);
+    public void rejectFriendRequest(Long requestId) {
+        FriendRequest friendRequestOpt = friendRequestRepository.findByRequesterId(requestId).orElseThrow(
+                () -> new CustomErrorException("Not found requester by requestID")
+        );;
 
-        if (friendRequestOpt.isPresent()) {
-            FriendRequest friendRequest = friendRequestOpt.get();
+            FriendRequest friendRequest = friendRequestOpt;
             friendRequest.setStatus(FriendStatus.REJECTED);  // Cập nhật trạng thái
             friendRequestRepository.save(friendRequest);  // Lưu vào database
-        }
-        return friendRequestOpt;
     }
     
     // Lấy danh sách lời mời kết bạn
-<<<<<<< Updated upstream
-    public List<User> findPendingFriendRequests(Long userId) {
-        return friendRequestRepository.findPendingFriendRequests(userId);
-=======
     public List<FriendRequestResponse> findFriendRequests(Long userId) {
         List<User> users = friendRequestRepository.findPendingFriendRequests(userId);
         return users.stream()
                     .map(user -> user.mapToFriendRequestResponse(FriendStatus.PENDING))
                     .toList();
->>>>>>> Stashed changes
     }
 }

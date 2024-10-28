@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.example.snapheal.responses.FriendRequestResponse;
 import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.ProfileResponse;
 
@@ -90,8 +91,6 @@ public class User implements UserDetails {
 				.avatar(avatar)
 				.username(username)
 				.fullName(fullName)
-<<<<<<< Updated upstream
-=======
 				.status(status)
 				.build();
 	}
@@ -124,7 +123,6 @@ public class User implements UserDetails {
 				.avatar(avatar)
 				.username(username)
 				.fullName(fullName)
->>>>>>> Stashed changes
 				.build();
 	}
 }

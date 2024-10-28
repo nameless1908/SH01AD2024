@@ -43,13 +43,25 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<ResponseObject> register(@RequestBody RegisterUserDto registerUserDto) throws Exception {
         User registeredUser = authenticationService.signup(registerUserDto);
-
+        String jwtToken = jwtService.generateToken(registeredUser);
+        ;
+        RefreshToken refreshToken = refreshTokenService.save(registeredUser, jwtToken);
+        LoginResponse loginResponse = LoginResponse.builder()
+                .id(registeredUser.getId())
+                .email(registeredUser.getEmail())
+                .username(registeredUser.getUsername())
+                .fullName(registeredUser.getFullName())
+                .avatar(registeredUser.getAvatar())
+                .token(jwtToken)
+                .refreshToken(refreshToken.getRefreshToken())
+                .tokenType("Bearer ")
+                .build();
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .message("Register successfully!")
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(true)
+                        .data(loginResponse)
                         .build()
         );
     }
@@ -86,7 +98,7 @@ public class AuthenticationController {
     @PostMapping("/refresh-token")
     public ResponseEntity<ResponseObject> refreshToken(@RequestBody RefreshTokenDto refreshTokenDto) throws Exception {
         User userDetails = userService.getUserDetailsFromRefreshToken(refreshTokenDto.getRefreshToken());
-        RefreshToken token = refreshTokenService.refreshToken(refreshTokenDto.getRefreshToken(), userDetails);
+        RefreshToken token = refreshTokenService.refreshToken(userDetails);
         LoginResponse loginResponse = LoginResponse.builder()
                 .id(userDetails.getId())
                 .email(userDetails.getEmail())

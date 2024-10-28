@@ -27,6 +27,9 @@ public class RefreshTokenService {
     @Value("${security.jwt.refresh-expiration-time}")
     private long refreshTokenExpirationTime;
 
+    public void save(RefreshToken token) {
+        refreshTokenRepository.save(token);
+    }
     public RefreshToken save(User user, String token) {
         Date now = new Date();
         RefreshToken refreshToken = RefreshToken.builder()
@@ -49,12 +52,7 @@ public class RefreshTokenService {
         );
     }
 
-    public RefreshToken refreshToken(String refreshToken, User user) {
-        RefreshToken token = findByRefreshToken(refreshToken);
-        token.setRevoked(true);
-        token.setUpdateAt(new Date());
-        refreshTokenRepository.save(token);
-
+    public RefreshToken refreshToken(User user) {
         RefreshToken newToken = RefreshToken.builder()
                 .token(jwtService.generateToken(user))
                 .tokenExpirationDate(LocalDateTime.now().plusSeconds(tokenExpirationTime))

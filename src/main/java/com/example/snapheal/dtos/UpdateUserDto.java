@@ -1,6 +1,6 @@
-package com.example.snapheal.responses;
-
+package com.example.snapheal.dtos;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,10 +9,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class UserResponse {
+@Builder
+public class UpdateUserDto {
 	private Long id;
 	private String username;
-	private String fullName;
+	private String fullname;
+	private String email;
 	private String avatar;
-	private String status;
 }
+

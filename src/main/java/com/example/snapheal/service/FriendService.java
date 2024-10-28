@@ -23,17 +23,12 @@ public class FriendService {
 
 
     // Tìm kiếm bạn bè
-<<<<<<< Updated upstream
-    public List<User> searchFriends(Long userId, String searchTerm) {
-        return friendRepository.findFriendsBySearch(userId, searchTerm);
-=======
     public List<FriendResponse> searchFriends(Long userId, String searchTerm) {
     	List<User> friends = new ArrayList<>();
     	friends.addAll(friendRepository.findFriendsBySearch(userId, searchTerm));
     	return friends.stream()
                 .map(user -> user.mapToFriendResponse(FriendStatus.ACCEPTED))
                 .toList();
->>>>>>> Stashed changes
     }
     
     // Lấy toàn bộ danh sách bạn bè của người dùng theo ID
