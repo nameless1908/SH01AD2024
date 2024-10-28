@@ -10,7 +10,6 @@ import com.example.snapheal.dtos.UpdateUserDto;
 import com.example.snapheal.entities.RefreshToken;
 import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.exceptions.TokenInvalidException;
-import com.example.snapheal.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -72,7 +71,7 @@ public class UserService {
 	    userRepository.save(user);
 	}
 
-	
+
 	public User getUserDetailsFromToken(String token) throws Exception {
 		String username = jwtService.extractUsername(token);
 		return  userRepository.findByUsername(username).orElseThrow(
@@ -88,6 +87,11 @@ public class UserService {
 		if (existToken.getRefreshTokenExpirationDate().isBefore(LocalDateTime.now())) {
 			throw new TokenInvalidException("Refresh Token Expired!");
 		}
-		return getUserDetailsFromToken(existToken.getToken());
+		if (existToken.getTokenExpirationDate().isBefore(LocalDateTime.now())) {
+			existToken.setRevoked(true);
+			existToken.setUpdateAt(new Date());
+			refreshTokenService.save(existToken);
+		}
+		return existToken.getUser();
 	}
 }

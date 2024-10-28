@@ -106,6 +106,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.getWriter().write(new ObjectMapper().writeValueAsString(
                 ResponseObject.builder()
                         .status(HttpStatus.UNAUTHORIZED)
+                        .code(HttpStatus.UNAUTHORIZED.value())
                         .message(message)
                         .data(null)
                         .build()

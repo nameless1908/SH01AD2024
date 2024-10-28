@@ -86,7 +86,7 @@ public class AuthenticationController {
     @PostMapping("/refresh-token")
     public ResponseEntity<ResponseObject> refreshToken(@RequestBody RefreshTokenDto refreshTokenDto) throws Exception {
         User userDetails = userService.getUserDetailsFromRefreshToken(refreshTokenDto.getRefreshToken());
-        RefreshToken token = refreshTokenService.refreshToken(refreshTokenDto.getRefreshToken(), userDetails);
+        RefreshToken token = refreshTokenService.refreshToken(userDetails);
         LoginResponse loginResponse = LoginResponse.builder()
                 .id(userDetails.getId())
                 .email(userDetails.getEmail())

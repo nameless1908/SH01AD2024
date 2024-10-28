@@ -17,7 +17,7 @@ import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.service.FriendRequestService;
 
 @RestController
-@RequestMapping("${api.prefix}/request")
+@RequestMapping("${api.prefix}/friend-request")
 public class FriendRequestController {
 
     @Autowired
