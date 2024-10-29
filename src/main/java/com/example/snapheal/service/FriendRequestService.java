@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.example.snapheal.exceptions.CustomErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.snapheal.entities.Friend;
@@ -29,57 +30,84 @@ public class FriendRequestService {
     @Autowired
     private FriendRepository friendRepository;
 
-    // Tìm User dựa trên id
+    
     public User findById(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         return userOpt.orElse(null);
     }
 
-    // Tìm yêu cầu kết bạn dựa trên requestId
+
     public Optional<FriendRequest> findByRequestId(Long requestId) {
         return friendRequestRepository.findById(requestId);
     }
 
-    // Gửi yêu cầu kết bạn
+    
     public FriendRequest createFriendRequest(User requester, User receiver) {
+        
+    	Long requesterId = requester.getId();
+    	Long receiverId = receiver.getId();
+    	
+        if (requesterId == receiverId) {
+            throw new CustomErrorException("Cannot send a friend request to yourself.");
+        }
+
+        Optional<Friend> existingFriendship = friendRepository.findByUserAndFriend(requesterId, receiverId);
+        if (existingFriendship.isPresent()) {
+            throw new CustomErrorException("You are already friends with this user.");
+        }
+
+        Optional<FriendRequest> existingRequest = friendRequestRepository
+                .findByRequesterAndReceiverAndStatus(requesterId, receiverId, FriendStatus.PENDING);
+        if (existingRequest.isPresent()) {
+            throw new CustomErrorException("A friend request has already been sent.");
+        }
+
+        
+        Optional<FriendRequest> reverseRequest = friendRequestRepository
+                .findByRequesterAndReceiverAndStatus(receiverId, requesterId, FriendStatus.PENDING);
+        if (reverseRequest.isPresent()) {
+            throw new CustomErrorException("The recipient has already sent a friend request.");
+        }
+
         FriendRequest friendRequest = new FriendRequest();
-        friendRequest.setRequester(requester); // Người gửi yêu cầu kết bạn
-        friendRequest.setReceiver(receiver); // Người nhận yêu cầu kết bạn
-        friendRequest.setStatus(FriendStatus.PENDING); // Trạng thái ban đầu là PENDING
+        friendRequest.setRequester(requester);
+        friendRequest.setReceiver(receiver);
+        friendRequest.setStatus(FriendStatus.PENDING);
 
-        return friendRequestRepository.save(friendRequest); // Lưu vào DB
+        return friendRequestRepository.save(friendRequest);
     }
+    
+    public void acceptFriendRequest(Long requesterId) {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    // Chấp nhận yêu cầu kết bạn
-    public void acceptFriendRequest(Long requestId) {
-        FriendRequest friendRequestOpt = friendRequestRepository.findByRequesterId(requestId).orElseThrow(
+        FriendRequest friendRequest = friendRequestRepository.findRequestByRequesterId(userDetails.getId(), requesterId).orElseThrow(
                 () -> new CustomErrorException("Not found requester by requestID")
         );
-
-        FriendRequest friendRequest = friendRequestOpt;
-        friendRequest.setStatus(FriendStatus.ACCEPTED);  // Cập nhật trạng thái
-        friendRequestRepository.save(friendRequest);  // Lưu vào database
+        friendRequest.setStatus(FriendStatus.ACCEPTED);  
+        friendRequestRepository.save(friendRequest);  
 
         Friend friend = new Friend(friendRequest.getRequester(), friendRequest.getReceiver());
         friendRepository.save(friend);
     }
 
-    // Từ chối yêu cầu kết bạn
-    public void rejectFriendRequest(Long requestId) {
-        FriendRequest friendRequestOpt = friendRequestRepository.findByRequesterId(requestId).orElseThrow(
-                () -> new CustomErrorException("Not found requester by requestID")
-        );;
+    public void rejectFriendRequest(Long requesterId) {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            FriendRequest friendRequest = friendRequestOpt;
-            friendRequest.setStatus(FriendStatus.REJECTED);  // Cập nhật trạng thái
-            friendRequestRepository.save(friendRequest);  // Lưu vào database
+        FriendRequest friendRequest = friendRequestRepository.findRequestByRequesterId(userDetails.getId(), requesterId).orElseThrow(
+                () -> new CustomErrorException("Not found requester by requestID")
+        );
+        friendRequest.setStatus(FriendStatus.REJECTED);  
+        friendRequestRepository.save(friendRequest);  
     }
     
-    // Lấy danh sách lời mời kết bạn
     public List<FriendRequestResponse> findFriendRequests(Long userId) {
         List<User> users = friendRequestRepository.findPendingFriendRequests(userId);
         return users.stream()
                     .map(user -> user.mapToFriendRequestResponse(FriendStatus.PENDING))
                     .toList();
+    }
+    
+    public Optional<FriendRequest> getFriendRequestByUserIds(Long userId, Long targetId) {
+        return friendRequestRepository.findFriendRequestByUserIds(userId, targetId);
     }
 }

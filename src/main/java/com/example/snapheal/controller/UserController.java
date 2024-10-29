@@ -17,6 +17,7 @@ import com.example.snapheal.dtos.UpdateUserDto;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.responses.ProfileResponse;
 import com.example.snapheal.responses.ResponseObject;
+import com.example.snapheal.responses.UserDistanceResponse;
 import com.example.snapheal.responses.UserResponse;
 import com.example.snapheal.service.UserService;
 
@@ -78,4 +79,34 @@ public class UserController {
 	    );
 	}
 
+	@GetMapping("/detail")
+	public ResponseEntity<ResponseObject> getDetail(@RequestParam Long id) {
+		UserResponse response = userService.getDetail(id);
+		return ResponseEntity.ok(
+				ResponseObject.builder()
+						.data(response)
+						.status(HttpStatus.OK)
+						.code(HttpStatus.OK.value())
+						.message("User updated successfully!")
+						.build()
+		);
+	}
+	
+	@GetMapping("/nearby")
+	public ResponseEntity<ResponseObject> getNearbyUsers() {
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    User currentUser = (User) authentication.getPrincipal();
+	    Long currentUserId = currentUser.getId();
+
+	    List<UserDistanceResponse> nearbyUsers = userService.findNearbyUsers(currentUserId);
+
+	    return ResponseEntity.ok(
+	            ResponseObject.builder()
+	                    .status(HttpStatus.OK)
+	                    .code(HttpStatus.OK.value())
+	                    .message("Nearby users retrieved successfully")
+	                    .data(nearbyUsers)
+	                    .build()
+	    );
+	}
 }

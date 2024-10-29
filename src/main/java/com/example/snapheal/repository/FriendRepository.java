@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FriendRepository extends JpaRepository<Friend, Long> {
 
@@ -26,6 +27,10 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     List<User> findFriendsBySearch(@Param("userId") Long userId, @Param("searchTerm") String searchTerm);
     
     void deleteByUserIdAndFriendId(Long userId, Long friendId);
+
+    @Query("SELECT f FROM Friend f WHERE (f.user.id = :userId AND f.friend.id = :friendId) OR (f.user.id = :friendId AND f.friend.id = :userId)")
+    Optional<Friend> findByUserAndFriend(@Param("userId") Long userId, @Param("friendId") Long friendId);
+
     
 }
 
