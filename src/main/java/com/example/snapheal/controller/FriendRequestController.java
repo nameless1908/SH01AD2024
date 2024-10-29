@@ -3,6 +3,7 @@ package com.example.snapheal.controller;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.snapheal.dtos.SendFriendRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +26,10 @@ public class FriendRequestController {
 
     // API để gửi yêu cầu kết bạn
     @PostMapping("/send")
-    public ResponseEntity<ResponseObject> createFriendRequest(@RequestParam Long receiverId) {
+    public ResponseEntity<ResponseObject> createFriendRequest(@RequestBody SendFriendRequestDto dto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User requester = (User) authentication.getPrincipal();     
-        User receiver = friendRequestService.findById(receiverId);
+        User receiver = friendRequestService.findById(dto.getReceiverId());
 
         FriendRequest friendRequest = friendRequestService.createFriendRequest(requester, receiver);
         
