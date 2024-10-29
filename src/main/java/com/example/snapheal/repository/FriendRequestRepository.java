@@ -15,6 +15,15 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
 	// Lấy danh sách lời mời kết bạn
 	@Query("SELECT f.requester FROM FriendRequest f WHERE f.receiver.id = :userId AND f.status = 'PENDING'")
 	List<User> findPendingFriendRequests(@Param("userId") Long userId);
-	
-	Optional<FriendRequest> findByRequesterId(Long requesterId);
+
+	@Query("SELECT fr FROM FriendRequest fr " +
+			"WHERE (fr.requester.id = :targetUserId AND fr.receiver.id = :userId)")
+	Optional<FriendRequest> findRequestByRequesterId(@Param("userId") Long userId,
+													 @Param("targetUserId") Long targetUserId);
+
+	@Query("SELECT fr FROM FriendRequest fr " +
+			"WHERE (fr.requester.id = :userId AND fr.receiver.id = :targetUserId) " +
+			"   OR (fr.requester.id = :targetUserId AND fr.receiver.id = :userId)")
+	Optional<FriendRequest> findFriendRequestByUserIds(@Param("userId") Long userId,
+													   @Param("targetUserId") Long targetUserId);
 }

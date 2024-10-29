@@ -3,14 +3,19 @@ package com.example.snapheal.service;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.example.snapheal.dtos.UpdateUserDto;
+import com.example.snapheal.entities.FriendRequest;
+import com.example.snapheal.entities.FriendStatus;
 import com.example.snapheal.entities.RefreshToken;
 import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.exceptions.TokenInvalidException;
+import com.example.snapheal.responses.FriendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.snapheal.entities.User;
@@ -26,6 +31,8 @@ public class UserService {
 	private RefreshTokenService refreshTokenService;
 	@Autowired
 	private JwtService jwtService;
+	@Autowired
+	private FriendRequestService friendRequestService;
 
 	public Optional<User> findUserById(Long id) {
         return userRepository.findById(id);
@@ -103,5 +110,34 @@ public class UserService {
 			refreshTokenService.save(existToken);
 		}
 		return existToken.getUser();
+	}
+
+	public UserResponse getDetail(Long id) {
+		User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		User targetUser = userRepository.findById(id).orElseThrow(() -> new CustomErrorException("Not found user by id" + id));
+
+		Optional<FriendRequest> friendRequest = friendRequestService.getFriendRequestByUserIds(userDetails.getId(), id);
+		String status = "";
+		if (friendRequest.isPresent()) {
+			if (friendRequest.get().getStatus() == FriendStatus.PENDING) {
+				if (Objects.equals(friendRequest.get().getRequester().getId(), userDetails.getId())) {
+					status = "SENDING";
+				} else {
+					status = friendRequest.get().getStatus().name();
+				}
+			} else {
+				status = friendRequest.get().getStatus().name();
+			}
+		} else {
+			status = "NONE";
+		}
+
+		return UserResponse.builder()
+				.id(targetUser.getId())
+				.username(targetUser.getUsername())
+				.fullName(targetUser.getFullName())
+				.status(status)
+				.avatar(targetUser.getAvatar())
+				.build();
 	}
 }
