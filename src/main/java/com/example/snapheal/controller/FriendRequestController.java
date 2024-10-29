@@ -39,7 +39,7 @@ public class FriendRequestController {
         		.status(HttpStatus.OK)
         		.code(HttpStatus.OK.value())
         		.message("Created friend successfully")
-        		.data(friendRequest)
+        		.data(true)
         		.build()
         		);
     }

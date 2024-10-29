@@ -52,6 +52,12 @@ public class RefreshTokenService {
         );
     }
 
+    public RefreshToken findByToken(String token) {
+        return refreshTokenRepository.findByToken(token).orElseThrow(
+                () ->  new TokenInvalidException("Not found RefreshToken with Token!")
+        );
+    }
+
     public RefreshToken refreshToken(User user) {
         RefreshToken newToken = RefreshToken.builder()
                 .token(jwtService.generateToken(user))
