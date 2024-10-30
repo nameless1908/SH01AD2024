@@ -1,5 +1,8 @@
 package com.example.snapheal.responses;
 
+
+import com.example.snapheal.entities.Status;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,5 +19,5 @@ public class UserResponse {
 	private String username;
 	private String fullName;
 	private String avatar;
-	private String status;
+	private Status status;
 }

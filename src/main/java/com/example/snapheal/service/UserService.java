@@ -8,13 +8,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.example.snapheal.dtos.UpdateCurrentLocationDto;
 import com.example.snapheal.dtos.UpdateUserDto;
 import com.example.snapheal.entities.FriendRequest;
 import com.example.snapheal.entities.FriendStatus;
 import com.example.snapheal.entities.RefreshToken;
+import com.example.snapheal.entities.Status;
 import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.exceptions.TokenInvalidException;
-import com.example.snapheal.responses.FriendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -43,17 +44,27 @@ public class UserService {
 	public List<UserResponse> searchUserWithFriendRequestStatus(Long currentUserId, String searchTerm) {
 	    List<Object[]> list = userRepository.searchUsersWithFriendStatus(currentUserId, searchTerm);
 	    List<UserResponse> userResponses = list.stream()
-	            .map(result -> {
-	                return new UserResponse(
-	                	(Long) result[0],   // id
-	                    (String) result[9], // username
-	                    (String) result[6], // fullname
-	                    (String) result[1], // avatar
-	                    (String) result[10]  // status 
-	                );
-	            })
-	            .collect(Collectors.toList());
+	        .map(result -> {
+	            Long id = (Long) result[0];
+	            String username = (String) result[9];
+	            String fullName = (String) result[6];
+	            String avatar = (String) result[1];
+	            String statusString = (String) result[10];
+
+	            Status status = Status.valueOf(statusString.toUpperCase());
+
+	            return UserResponse.builder()
+	                .id(id)
+	                .username(username)
+	                .fullName(fullName)
+	                .avatar(avatar)
+	                .status(status)
+	                .build();
+	        })
+	        .collect(Collectors.toList());
+
 	    return userResponses;
+	    
 	}
 	
 	public List<ProfileResponse> getProfileUser(Long userId){
@@ -119,19 +130,20 @@ public class UserService {
 		User targetUser = userRepository.findById(id).orElseThrow(() -> new CustomErrorException("Not found user by id" + id));
 
 		Optional<FriendRequest> friendRequest = friendRequestService.getFriendRequestByUserIds(userDetails.getId(), id);
-		String status = "";
+		Status status;
+
 		if (friendRequest.isPresent()) {
-			if (friendRequest.get().getStatus() == FriendStatus.PENDING) {
-				if (Objects.equals(friendRequest.get().getRequester().getId(), userDetails.getId())) {
-					status = "SENDING";
-				} else {
-					status = friendRequest.get().getStatus().name();
-				}
-			} else {
-				status = friendRequest.get().getStatus().name();
-			}
+		    if (friendRequest.get().getStatus() == FriendStatus.PENDING) {
+		        if (Objects.equals(friendRequest.get().getRequester().getId(), userDetails.getId())) {
+		            status = Status.SENDING;  
+		        } else {
+		            status = Status.PENDING;  
+		        }
+		    } else {
+		    	status = mapFriendStatusToStatus(friendRequest.get().getStatus(), friendRequest.get().getRequester().getId(), userDetails.getId());  
+		    }
 		} else {
-			status = "NONE";
+		    status = Status.NONE;  
 		}
 
 		return UserResponse.builder()
@@ -142,6 +154,20 @@ public class UserService {
 				.avatar(targetUser.getAvatar())
 				.build();
 	}
+	
+	private Status mapFriendStatusToStatus(FriendStatus friendStatus, Long requesterId, Long currentUserId) {
+	    if (friendStatus == FriendStatus.PENDING) {
+	        return requesterId.equals(currentUserId) ? Status.SENDING : Status.PENDING;
+	    }
+	    if (friendStatus == FriendStatus.ACCEPTED) {
+	        return Status.ACCEPTED;
+	    }
+	    if (friendStatus == FriendStatus.REJECTED) {
+	        return Status.REJECTED;
+	    }
+	    return Status.NONE;
+	}
+
 	
 	public List<UserDistanceResponse> findNearbyUsers(Long currentUserId) {
 	    User currentUser = userRepository.findById(currentUserId)
@@ -164,8 +190,18 @@ public class UserService {
 	            .collect(Collectors.toList());
 	}
 
-	
 	private double calculateEuclideanDistance(double lat1, double lon1, double lat2, double lon2) {
 	    return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
+	}
+	
+	public void updateLocation(UpdateCurrentLocationDto dto) {
+		 User user = userRepository.findById(dto.getId()).orElseThrow(
+		            () -> new CustomErrorException("Can not found User with id: " + dto.getId())
+		    );
+		 
+		 user.setCurrentLatitude(dto.getCurrentLatitude());
+		 user.setCurrentLongitude(dto.getCurrentLongitude());
+		 
+		 userRepository.save(user);	 
 	}
 }

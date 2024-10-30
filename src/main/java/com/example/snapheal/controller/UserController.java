@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.snapheal.dtos.UpdateCurrentLocationDto;
 import com.example.snapheal.dtos.UpdateUserDto;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.responses.ProfileResponse;
@@ -28,7 +29,6 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	//lấy thông tin người dùng login
 	@GetMapping("/user-login")
 	public ResponseEntity<ResponseObject> getUserLogin(){
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -47,7 +47,7 @@ public class UserController {
 				);
 	}
 
-	//tìm kiếm người dùng
+	
 	@GetMapping("/search")
 	public ResponseEntity<ResponseObject> searchUsers(@RequestParam String searchTerm) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -106,6 +106,19 @@ public class UserController {
 	                    .code(HttpStatus.OK.value())
 	                    .message("Nearby users retrieved successfully")
 	                    .data(nearbyUsers)
+	                    .build()
+	    );
+	}
+	
+	@PutMapping("/update-location")
+	public ResponseEntity<ResponseObject> updateCurrentLocation(@RequestBody UpdateCurrentLocationDto dto) {
+	    userService.updateLocation(dto);
+	    return ResponseEntity.ok(
+	            ResponseObject.builder()
+	                    .data(true)
+	                    .status(HttpStatus.OK)
+	                    .code(HttpStatus.OK.value())
+	                    .message("Current location updated successfully!")
 	                    .build()
 	    );
 	}

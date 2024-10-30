@@ -1,8 +1,8 @@
 package com.example.snapheal.controller;
 
 import java.util.List;
-import java.util.Optional;
 
+import com.example.snapheal.dtos.CancelFriendRequestDto;
 import com.example.snapheal.dtos.SendFriendRequestDto;
 import com.example.snapheal.dtos.UpdateFriendRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.snapheal.entities.FriendRequest;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.responses.FriendRequestResponse;
 import com.example.snapheal.responses.ResponseObject;
@@ -32,7 +31,7 @@ public class FriendRequestController {
         User requester = (User) authentication.getPrincipal();     
         User receiver = friendRequestService.findById(dto.getReceiverId());
 
-        FriendRequest friendRequest = friendRequestService.createFriendRequest(requester, receiver);
+        friendRequestService.createFriendRequest(requester, receiver);
         
         return ResponseEntity.ok(
         		ResponseObject.builder()
@@ -91,6 +90,22 @@ public class FriendRequestController {
         		.data(friendRequestResponses)
         		.build()
         		);
+    }
+    
+    @PostMapping("/cancel")
+    public ResponseEntity<ResponseObject> cancelFriendRequest(@RequestBody CancelFriendRequestDto dto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User requester = (User) authentication.getPrincipal();     
+        User receiver = friendRequestService.findById(dto.getReceiverId()); 
+
+        friendRequestService.cancelFriendRequest(requester, receiver);
+
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                    .status(HttpStatus.OK)
+                    .code(HttpStatus.OK.value())
+                    .message("Friend request canceled successfully")
+                    .build());
     }
 }
 

@@ -1,6 +1,5 @@
 package com.example.snapheal.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -109,5 +108,23 @@ public class FriendRequestService {
     
     public Optional<FriendRequest> getFriendRequestByUserIds(Long userId, Long targetId) {
         return friendRequestRepository.findFriendRequestByUserIds(userId, targetId);
+    }
+    
+    public void cancelFriendRequest(User requester, User receiver) {
+    	Long requesterId = requester.getId();
+    	Long receiverId = receiver.getId();
+    	
+        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findPendingRequestByUserIds(requesterId, receiverId);
+        
+        if (friendRequestOpt.isPresent()) {
+            FriendRequest friendRequest = friendRequestOpt.get();
+            if (friendRequest.getStatus() == FriendStatus.PENDING) {
+                friendRequestRepository.delete(friendRequest);
+            } else {
+                throw new CustomErrorException("Cannot cancel this friend request");
+            }
+        } else {
+            throw new CustomErrorException("Friend request not found");
+        }
     }
 }
