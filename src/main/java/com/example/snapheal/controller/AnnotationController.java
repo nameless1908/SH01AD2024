@@ -1,6 +1,7 @@
 package com.example.snapheal.controller;
 
 import com.example.snapheal.dtos.AnnotationDto;
+import com.example.snapheal.dtos.UpdateAnnotationImagesDto;
 import com.example.snapheal.dtos.UpdateFriendAnnotationDto;
 import com.example.snapheal.responses.AnnotationDetailResponse;
 import com.example.snapheal.responses.AnnotationResponse;
@@ -62,6 +63,19 @@ public class AnnotationController {
     @PutMapping("/update-friend")
     public ResponseEntity<ResponseObject> updateFriends(@RequestBody UpdateFriendAnnotationDto dto) {
         annotationService.updateFriendTagged(dto);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .data(true)
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message("Create Successfully!")
+                        .build()
+        );
+    }
+
+    @PutMapping("/update-images")
+    public ResponseEntity<ResponseObject> updateImages(@RequestBody UpdateAnnotationImagesDto dto) {
+        annotationService.updateImages(dto);
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .data(true)
