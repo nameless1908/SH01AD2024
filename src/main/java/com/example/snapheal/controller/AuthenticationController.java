@@ -11,6 +11,7 @@ import com.example.snapheal.service.AuthenticationService;
 import com.example.snapheal.service.JwtService;
 import com.example.snapheal.service.RefreshTokenService;
 import com.example.snapheal.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -88,6 +89,22 @@ public class AuthenticationController {
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .data(loginResponse)
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message("Successfully!")
+                        .build()
+        );
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseObject> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        final String jwt = authHeader.substring(7);
+        RefreshToken token = refreshTokenService.findByToken(jwt);
+        token.setRevoked(true);
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .data(true)
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .message("Successfully!")

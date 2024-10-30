@@ -13,8 +13,12 @@ public class PhotoService {
     @Autowired
     private PhotoRepository photoRepository;
 
-    public Photo save(Photo photo) {
-        return photoRepository.save(photo);
+    public void save(Photo photo) {
+        photoRepository.save(photo);
+    }
+
+    public void delete(Long id) {
+        photoRepository.deleteById(id);
     }
 
     public List<PhotoResponse> getPhotosByAnnotationId(Long annotationId) {

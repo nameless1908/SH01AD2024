@@ -3,6 +3,8 @@ package com.example.snapheal.controller;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.snapheal.dtos.SendFriendRequestDto;
+import com.example.snapheal.dtos.UpdateFriendRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +27,10 @@ public class FriendRequestController {
 
     // API để gửi yêu cầu kết bạn
     @PostMapping("/send")
-    public ResponseEntity<ResponseObject> createFriendRequest(@RequestParam Long receiverId) {
+    public ResponseEntity<ResponseObject> createFriendRequest(@RequestBody SendFriendRequestDto dto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User requester = (User) authentication.getPrincipal();     
-        User receiver = friendRequestService.findById(receiverId);
+        User receiver = friendRequestService.findById(dto.getReceiverId());
 
         FriendRequest friendRequest = friendRequestService.createFriendRequest(requester, receiver);
         
@@ -37,15 +39,15 @@ public class FriendRequestController {
         		.status(HttpStatus.OK)
         		.code(HttpStatus.OK.value())
         		.message("Created friend successfully")
-        		.data(friendRequest)
+        		.data(true)
         		.build()
         		);
     }
     
     // API để chấp nhận yêu cầu kết bạn
     @PutMapping("/accept")
-    public ResponseEntity<ResponseObject> acceptFriendRequest(@RequestParam Long requestId) {
-    	friendRequestService.acceptFriendRequest(requestId);
+    public ResponseEntity<ResponseObject> acceptFriendRequest(@RequestBody UpdateFriendRequestDto dto) {
+    	friendRequestService.acceptFriendRequest(dto.getRequesterId());
 
         return ResponseEntity.ok(
         		ResponseObject.builder()
@@ -59,9 +61,9 @@ public class FriendRequestController {
     
     // API để từ chối yêu cầu kết bạn
     @PutMapping("/reject")
-    public ResponseEntity<ResponseObject> rejectFriendRequest(@RequestParam Long requestId) {
+    public ResponseEntity<ResponseObject> rejectFriendRequest(@RequestBody UpdateFriendRequestDto dto) {
     	
-    	friendRequestService.rejectFriendRequest(requestId);
+    	friendRequestService.rejectFriendRequest(dto.getRequesterId());
 
         return ResponseEntity.ok(
         		ResponseObject.builder()

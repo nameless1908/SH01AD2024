@@ -27,16 +27,16 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	//lấy thông tin người dùng login
 	@GetMapping("/user-login")
 	public ResponseEntity<ResponseObject> getUserLogin(){
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
-        
+
         List<ProfileResponse> profileResponses = userService.getProfileUser(userId);
-        
+
 		return ResponseEntity.ok(
 				ResponseObject.builder()
 				.status(HttpStatus.OK)
@@ -46,14 +46,14 @@ public class UserController {
 				.build()
 				);
 	}
-	
+
 	//tìm kiếm người dùng
 	@GetMapping("/search")
 	public ResponseEntity<ResponseObject> searchUsers(@RequestParam String searchTerm) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
-	    
+
 	    List<UserResponse> userResponses = userService.searchUserWithFriendRequestStatus(userId, searchTerm);
 
 	    return ResponseEntity.ok(
@@ -64,7 +64,7 @@ public class UserController {
 	    		.data(userResponses)
 	    		.build());
 	}
-	
+
 	//Cập nhật User
 	@PutMapping("/update")
 	public ResponseEntity<ResponseObject> updateUser(@RequestBody UpdateUserDto dto) {

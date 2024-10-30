@@ -1,6 +1,7 @@
 package com.example.snapheal.service;
 
 import com.example.snapheal.dtos.AnnotationDto;
+import com.example.snapheal.dtos.UpdateAnnotationImagesDto;
 import com.example.snapheal.dtos.UpdateFriendAnnotationDto;
 import com.example.snapheal.entities.Annotation;
 import com.example.snapheal.entities.AnnotationTag;
@@ -18,6 +19,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -129,6 +131,42 @@ public class AnnotationService {
                     .annotation(annotation)
                     .build();
             annotationTagService.save(newAnnotationTag);
+        }
+    }
+
+    public void updateImages(UpdateAnnotationImagesDto dto) {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Annotation annotation = annotationRepository.findById(dto.getAnnotationId()).orElseThrow(
+                () -> new CustomErrorException("Can not found Annotation with id: " + dto.getAnnotationId())
+        );
+        List<PhotoResponse> photos = photoService.getPhotosByAnnotationId(dto.getAnnotationId());
+        List<String> dtoImgs = dto.getImageUrls();
+
+        List<PhotoResponse> photoRemoveds = photos.stream()
+                .filter(obj -> !dtoImgs.contains(obj.getPhotoUrl()))
+                .toList();
+
+        for (PhotoResponse photoResponse: photoRemoveds) {
+            photoService.delete(photoResponse.getId());
+        }
+
+        List<String> oldImgs = photos.stream()
+                .map(PhotoResponse::getPhotoUrl)
+                .toList();
+
+        List<String> newImgs = dtoImgs.stream()
+                .filter(url -> !oldImgs.contains(url))
+                .toList();
+
+        for (String img: newImgs) {
+            Photo photo = Photo.builder()
+                    .annotation(annotation)
+                    .photoUrl(img)
+                    .createAt(new Date())
+                    .createBy(userDetails)
+                    .build();
+            photoService.save(photo);
         }
     }
 }

@@ -14,6 +14,7 @@ import com.example.snapheal.entities.FriendStatus;
 import com.example.snapheal.entities.RefreshToken;
 import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.exceptions.TokenInvalidException;
+import com.example.snapheal.responses.FriendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
