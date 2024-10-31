@@ -186,7 +186,7 @@ public class UserService {
 	                        user.getAvatar(), distance);
 	            })
 	            .sorted(Comparator.comparingDouble(UserDistanceResponse::getDistance))
-	            .limit(5)
+	            .limit(20)
 	            .collect(Collectors.toList());
 	}
 

@@ -4,10 +4,11 @@ import com.example.snapheal.responses.FriendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
+import com.example.snapheal.entities.Friend;
 import com.example.snapheal.entities.FriendStatus;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRepository;
+import com.example.snapheal.repository.FriendRequestRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -20,6 +21,9 @@ public class FriendService {
 
     @Autowired
     private FriendRepository friendRepository;
+    
+    @Autowired
+    private FriendRequestRepository friendRequestRepository;
 
 
     // Tìm kiếm bạn bè
@@ -44,6 +48,7 @@ public class FriendService {
     @Transactional
     public void deleteFriend(Long userId, Long friendId) {
     	friendRepository.deleteByUserAndFriend(userId, friendId);
+    	friendRequestRepository.deleteAcceptedRequest(userId, friendId);
     }
 }
 
