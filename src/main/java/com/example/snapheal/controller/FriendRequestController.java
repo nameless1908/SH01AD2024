@@ -105,6 +105,7 @@ public class FriendRequestController {
                     .status(HttpStatus.OK)
                     .code(HttpStatus.OK.value())
                     .message("Friend request canceled successfully")
+                        .data(true)
                     .build());
     }
 }
