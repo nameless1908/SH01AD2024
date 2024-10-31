@@ -61,6 +61,13 @@ public class FriendRequestService {
             throw new CustomErrorException("A friend request has already been sent.");
         }
 
+        Optional<FriendRequest> existingRejectedRequest = friendRequestRepository
+                .findByRequesterAndReceiverAndStatus(requesterId, receiverId, FriendStatus.REJECTED);
+        if (existingRejectedRequest.isPresent()) {
+            FriendRequest rejectedRequest = existingRejectedRequest.get();
+            rejectedRequest.setStatus(FriendStatus.PENDING); 
+            return friendRequestRepository.save(rejectedRequest);
+        }
         
         Optional<FriendRequest> reverseRequest = friendRequestRepository
                 .findByRequesterAndReceiverAndStatus(receiverId, requesterId, FriendStatus.PENDING);

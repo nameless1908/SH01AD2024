@@ -34,7 +34,10 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	Optional<User> findByEmailOrUsername(@Param("email") String email, @Param("username") String username);
 	
 	@Query("SELECT u FROM User u WHERE u.id != :currentUserId AND " +
-		       "u.id NOT IN (SELECT f.friend.id FROM Friend f WHERE f.user.id = :currentUserId)")
-		List<User> findUsersExcludingFriends(@Param("currentUserId") Long currentUserId);
+		       "u.id NOT IN (SELECT f.friend.id FROM Friend f WHERE f.user.id = :currentUserId) AND " +
+		       "NOT EXISTS (SELECT 1 FROM FriendRequest fr WHERE (fr.requester.id = :currentUserId AND fr.receiver.id = u.id) " +
+		       "OR (fr.receiver.id = :currentUserId AND fr.requester.id = u.id))")
+	List<User> findUsersExcludingFriendsAndPendingRequests(@Param("currentUserId") Long currentUserId);
+
 
 }

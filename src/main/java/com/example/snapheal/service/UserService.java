@@ -176,11 +176,11 @@ public class UserService {
 	    double currentLat = currentUser.getCurrentLatitude();
 	    double currentLng = currentUser.getCurrentLongitude();
 
-	    List<User> potentialFriends = userRepository.findUsersExcludingFriends(currentUserId);
+	    List<User> potentialFriends = userRepository.findUsersExcludingFriendsAndPendingRequests(currentUserId);
 
 	    return potentialFriends.stream()
 	            .map(user -> {
-	                double distance = calculateEuclideanDistance(currentLat, currentLng,
+	                double distance = distanceBetween2Points(currentLat, currentLng,
 	                        user.getCurrentLatitude(), user.getCurrentLongitude());
 	                return new UserDistanceResponse(user.getId(), user.getUsername(), user.getFullName(),
 	                        user.getAvatar(), distance);
@@ -190,8 +190,17 @@ public class UserService {
 	            .collect(Collectors.toList());
 	}
 
-	private double calculateEuclideanDistance(double lat1, double lon1, double lat2, double lon2) {
-	    return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
+	public static double distanceBetween2Points(double la1, double lo1, double la2, double lo2) {
+	    double R = 6371;
+	    double dLat = (la2 - la1) * (Math.PI / 180);
+	    double dLon = (lo2 - lo1) * (Math.PI / 180);
+	    double la1ToRad = la1 * (Math.PI / 180);
+	    double la2ToRad = la2 * (Math.PI / 180);
+	    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(la1ToRad)
+	                * Math.cos(la2ToRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+	    double d = R * c;
+	    return d;
 	}
 	
 	public void updateLocation(UpdateCurrentLocationDto dto) {
