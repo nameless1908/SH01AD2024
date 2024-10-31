@@ -1,5 +1,6 @@
 package com.example.snapheal.controller;
 
+import com.example.snapheal.dtos.UpdateFriendRequestDto;
 import com.example.snapheal.entities.Friend;
 import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.ResponseObject;
@@ -75,20 +76,20 @@ public class FriendController {
 
     // API để xóa bạn bè
     @DeleteMapping("/delete")
-    public ResponseEntity<ResponseObject> deleteFriend(@RequestParam Long friendId) {
+    public ResponseEntity<ResponseObject> deleteFriend(@RequestBody UpdateFriendRequestDto dto) {
         
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
 
-        friendService.deleteFriend(userId, friendId);
+        friendService.deleteFriend(userId, dto.getRequesterId());
 
         return ResponseEntity.ok(
         		ResponseObject.builder()
-        			.status(HttpStatus.NO_CONTENT)
-        			.code(HttpStatus.NO_CONTENT.value())
+        			.status(HttpStatus.OK)
+        			.code(HttpStatus.OK.value())
         			.message("Friend deleted successfully")
-        			.data(null)
+        			.data(true)
         			.build()
         			);
     }

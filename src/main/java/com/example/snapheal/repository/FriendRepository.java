@@ -4,8 +4,10 @@ import com.example.snapheal.entities.Friend;
 import com.example.snapheal.entities.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,8 +27,11 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     //Tìm kiếm bạn bè
     @Query("SELECT f.friend FROM Friend f WHERE f.user.id = :userId AND (f.friend.username LIKE %:searchTerm% OR f.friend.fullName LIKE %:searchTerm%)")
     List<User> findFriendsBySearch(@Param("userId") Long userId, @Param("searchTerm") String searchTerm);
-    
-    void deleteByUserIdAndFriendId(Long userId, Long friendId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Friend f WHERE (f.user.id = :userId AND f.friend.id = :friendId) OR (f.user.id = :friendId AND f.friend.id = :userId)")
+    void deleteByUserAndFriend(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
     @Query("SELECT f FROM Friend f WHERE (f.user.id = :userId AND f.friend.id = :friendId) OR (f.user.id = :friendId AND f.friend.id = :userId)")
     Optional<Friend> findByUserAndFriend(@Param("userId") Long userId, @Param("friendId") Long friendId);

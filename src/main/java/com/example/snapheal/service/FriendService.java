@@ -43,7 +43,7 @@ public class FriendService {
     
     @Transactional
     public void deleteFriend(Long userId, Long friendId) {
-    	friendRepository.deleteByUserIdAndFriendId(userId, friendId);
+    	friendRepository.deleteByUserAndFriend(userId, friendId);
     }
 }
 
