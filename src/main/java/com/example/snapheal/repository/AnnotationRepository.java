@@ -16,4 +16,14 @@ public interface AnnotationRepository extends JpaRepository<Annotation, Long> {
             "WHERE a.owner.id = :userId " +
             "OR at.taggedUser.id = :userId")
     List<Annotation> findAnnotationsByOwnerIdAndTaggedUserId(@Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT a FROM Annotation a " +
+            "LEFT JOIN AnnotationTag at ON at.annotation.id = a.id " +
+            "WHERE (a.owner.id = :userId OR at.taggedUser.id = :userId) " +
+            "AND (a.title LIKE %:searchQuery% " +
+            "OR a.name LIKE %:searchQuery% " +
+            "OR a.address LIKE %:searchQuery%)")
+    List<Annotation> findAnnotationsByOwnerIdAndSearchQuery(
+            @Param("userId") Long userId,
+            @Param("searchQuery") String searchQuery);
 }

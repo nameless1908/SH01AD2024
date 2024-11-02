@@ -85,4 +85,18 @@ public class AnnotationController {
                         .build()
         );
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResponseObject> searchAnnotation(@RequestParam String query) {
+        List<AnnotationResponse> annotations = annotationService.search(query);
+
+        return  ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code(200)
+                        .message("Successfully!")
+                        .data(annotations)
+                        .status(HttpStatus.OK)
+                        .build()
+        );
+    }
 }

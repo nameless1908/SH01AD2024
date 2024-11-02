@@ -43,11 +43,19 @@ public class AnnotationService {
     private PhotoService photoService;
     @PersistenceContext
     private EntityManager entityManager;
+
     public List<AnnotationResponse> getList() {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userDetails.getId());
         return annotations.stream().map(Annotation::mapToAnnotationResponse).collect(Collectors.toList());
     }
+
+    public List<AnnotationResponse> search(String query) {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndSearchQuery(userDetails.getId(), query);
+        return annotations.stream().map(Annotation::mapToAnnotationResponse).collect(Collectors.toList());
+    }
+
     @Transactional
     public boolean createAnnotation(AnnotationDto annotationDto) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

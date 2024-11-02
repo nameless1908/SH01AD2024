@@ -30,6 +30,7 @@ public class RefreshTokenService {
     public void save(RefreshToken token) {
         refreshTokenRepository.save(token);
     }
+
     public RefreshToken save(User user, String token) {
         Date now = new Date();
         RefreshToken refreshToken = RefreshToken.builder()
@@ -48,13 +49,13 @@ public class RefreshTokenService {
 
     public RefreshToken findByRefreshToken(String refreshToken) {
         return refreshTokenRepository.findByRefreshToken(refreshToken).orElseThrow(
-                () ->  new TokenInvalidException("Refresh token not found!")
+                () -> new TokenInvalidException("Refresh token not found!")
         );
     }
 
     public RefreshToken findByToken(String token) {
         return refreshTokenRepository.findByToken(token).orElseThrow(
-                () ->  new TokenInvalidException("Not found RefreshToken with Token!")
+                () -> new TokenInvalidException("Not found RefreshToken with Token!")
         );
     }
 

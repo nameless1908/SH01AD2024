@@ -75,30 +75,17 @@ public class UserService {
 		return profileResponses;
 	}
 	
-	public void updateUser(UpdateUserDto dto) {
+	public User updateUser(UpdateUserDto dto) {
 	    User user = userRepository.findById(dto.getId()).orElseThrow(
 	            () -> new CustomErrorException("Can not found User with id: " + dto.getId())
 	    );
-
-	    
-	    if (!user.getUsername().equals(dto.getUsername())) {
-	        Optional<User> existingUser = userRepository.findByUsername(dto.getUsername());
-	        if (existingUser.isPresent()) {
-	            throw new CustomErrorException("Username already exists");
-	        }
-	        user.setUsername(dto.getUsername());
-	    }
-	    
-	    if (user.getEmail().equals(dto.getEmail())) {
-            throw new CustomErrorException("Email exist");
-        }
-
+		user.setUsername(dto.getUsername());
 	    user.setFullName(dto.getFullname());
 	    user.setEmail(dto.getEmail());
 	    user.setAvatar(dto.getAvatar());
 
 	    
-	    userRepository.save(user);
+	    return userRepository.save(user);
 	}
 
 

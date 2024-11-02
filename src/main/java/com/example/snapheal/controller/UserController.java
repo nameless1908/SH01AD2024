@@ -1,6 +1,12 @@
 package com.example.snapheal.controller;
 
 import java.util.List;
+
+import com.example.snapheal.entities.RefreshToken;
+import com.example.snapheal.responses.*;
+import com.example.snapheal.service.JwtService;
+import com.example.snapheal.service.RefreshTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.snapheal.dtos.UpdateCurrentLocationDto;
 import com.example.snapheal.dtos.UpdateUserDto;
 import com.example.snapheal.entities.User;
-import com.example.snapheal.responses.ProfileResponse;
-import com.example.snapheal.responses.ResponseObject;
-import com.example.snapheal.responses.UserDistanceResponse;
-import com.example.snapheal.responses.UserResponse;
 import com.example.snapheal.service.UserService;
 
 @RestController
@@ -28,6 +30,10 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private RefreshTokenService refreshTokenService;
+	@Autowired
+	private JwtService jwtService;
 
 	@GetMapping("/user-login")
 	public ResponseEntity<ResponseObject> getUserLogin(){
@@ -67,11 +73,24 @@ public class UserController {
 
 	//Cập nhật User
 	@PutMapping("/update")
-	public ResponseEntity<ResponseObject> updateUser(@RequestBody UpdateUserDto dto) {
-	    userService.updateUser(dto);
+	public ResponseEntity<ResponseObject> updateUser(@RequestBody UpdateUserDto dto, HttpServletRequest request) {
+	    User user = userService.updateUser(dto);
+		String authHeader = request.getHeader("Authorization");
+		final String jwt = authHeader.substring(7);
+		RefreshToken token = refreshTokenService.findByToken(jwt);
+		LoginResponse loginResponse = LoginResponse.builder()
+				.id(user.getId())
+				.email(user.getEmail())
+				.username(user.getUsername())
+				.fullName(user.getFullName())
+				.avatar(user.getAvatar())
+				.token(jwt)
+				.refreshToken(token.getRefreshToken())
+				.tokenType("Bearer ")
+				.build();
 	    return ResponseEntity.ok(
 	            ResponseObject.builder()
-	                    .data(true)
+	                    .data(loginResponse)
 	                    .status(HttpStatus.OK)
 	                    .code(HttpStatus.OK.value())
 	                    .message("User updated successfully!")
