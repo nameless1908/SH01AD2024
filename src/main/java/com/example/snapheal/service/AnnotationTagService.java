@@ -5,6 +5,7 @@ import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.AnnotationTagRepository;
 import com.example.snapheal.responses.FriendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,5 +30,12 @@ public class AnnotationTagService {
 
     public void delete(Long id) {
         annotationTagRepository.deleteByTaggedUserId(id);
+    }
+
+    public void removeTaggedUser(Long ownerId, Long taggedId) {
+        List<AnnotationTag> annotationTags = annotationTagRepository.findAnnotationTagsByOwnerAndTaggedUser(ownerId, taggedId);
+        for(AnnotationTag annotationTag: annotationTags) {
+            annotationTagRepository.deleteById(annotationTag.getId());
+        }
     }
 }

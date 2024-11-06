@@ -1,5 +1,6 @@
 package com.example.snapheal.service;
 
+import com.example.snapheal.entities.AnnotationTag;
 import com.example.snapheal.responses.FriendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ public class FriendService {
     @Autowired
     private FriendRequestRepository friendRequestRepository;
 
+    @Autowired
+    private AnnotationTagService annotationTagService;
 
     // Tìm kiếm bạn bè
     public List<FriendResponse> searchFriends(Long userId, String searchTerm) {
@@ -49,6 +52,8 @@ public class FriendService {
     public void deleteFriend(Long userId, Long friendId) {
     	friendRepository.deleteByUserAndFriend(userId, friendId);
     	friendRequestRepository.deleteAcceptedRequest(userId, friendId);
+        annotationTagService.removeTaggedUser(userId, friendId); // remove friend from annotation tag where owner is user
+        annotationTagService.removeTaggedUser(friendId, userId); // remove user from annotation tags when owner is friend
     }
 }
 
