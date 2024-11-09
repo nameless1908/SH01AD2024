@@ -9,17 +9,12 @@ import com.example.snapheal.entities.Photo;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.repository.AnnotationRepository;
-import com.example.snapheal.repository.AnnotationTagRepository;
-import com.example.snapheal.repository.PhotoRepository;
 import com.example.snapheal.responses.AnnotationDetailResponse;
 import com.example.snapheal.responses.AnnotationResponse;
 import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.PhotoResponse;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,8 +36,6 @@ public class AnnotationService {
 
     @Autowired
     private PhotoService photoService;
-    @PersistenceContext
-    private EntityManager entityManager;
 
     public List<AnnotationResponse> getList() {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
