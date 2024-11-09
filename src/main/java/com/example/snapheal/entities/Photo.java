@@ -3,8 +3,7 @@ package com.example.snapheal.entities;
 import com.example.snapheal.responses.PhotoResponse;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -12,6 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Photo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,14 +26,24 @@ public class Photo {
     @JoinColumn(name = "create_by")
     private User createBy;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createAt;
+    // Thay thế Date bằng LocalDateTime
+    @Column(name = "create_at", nullable = false)
+    private LocalDateTime createAt;
 
+    // Sử dụng LocalDateTime trong PhotoResponse
     public PhotoResponse mapToPhotoResponse() {
         return PhotoResponse.builder()
                 .id(id)
                 .photoUrl(photoUrl)
-                .createAt(createAt != null ? createAt.getTime() : null)
+                .createAt(createAt != null ? Long.valueOf(createAt.toString()) : null) // Chuyển LocalDateTime sang String
                 .build();
+    }
+
+    // Gán giá trị cho createAt trước khi persist
+    @PrePersist
+    public void prePersist() {
+        if (createAt == null) {
+            createAt = LocalDateTime.now();  // Set createAt khi chưa được gán
+        }
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -84,7 +85,7 @@ public class AnnotationService {
                     .annotation(newAnnotation)
                     .createBy(userDetails)
                     .photoUrl(image)
-                    .createAt(new Date())
+                    .createAt(LocalDateTime.now())
                     .build();
             photoService.save(photo);
         }
@@ -164,7 +165,7 @@ public class AnnotationService {
             Photo photo = Photo.builder()
                     .annotation(annotation)
                     .photoUrl(img)
-                    .createAt(new Date())
+                    .createAt(LocalDateTime.now())
                     .createBy(userDetails)
                     .build();
             photoService.save(photo);

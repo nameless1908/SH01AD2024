@@ -16,8 +16,8 @@ public class Annotation {
 
     private String title; // Title provided by user
     private String name;  // Name of location
-    private double latitude;
-    private double longitude;
+    private Double latitude;
+    private Double longitude;
     private String address;
     private String thumbnail;
 

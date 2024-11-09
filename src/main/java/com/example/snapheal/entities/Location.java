@@ -23,8 +23,8 @@ public class Location {
     private Long id;
 
     private String name;
-    private double latitude;
-    private double longitude;
+    private Double latitude;
+    private Double longitude;
     private String address;
     
     @ManyToOne
