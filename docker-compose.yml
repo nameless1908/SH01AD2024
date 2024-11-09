@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   mysql:
@@ -8,14 +8,12 @@ services:
       MYSQL_ROOT_PASSWORD: khanh022002
     ports:
       - "3307:3306"
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
-    environment:
-      PMA_HOST: mysql  # Tên dịch vụ MySQL trong docker-compose
-      MYSQL_ROOT_PASSWORD: yourpassword
-    ports:
-      - "8081:80"  # Truy cập phpMyAdmin qua http://localhost:8081
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   spring-app:
     build:
       context: .
@@ -26,7 +24,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/snapheal?createDatabaseIfNotExist=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=khanh022002
-    # Đặt biến môi trường dựa trên môi trường Docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/snapheal?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: khanh022002
