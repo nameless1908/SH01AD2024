@@ -7,7 +7,7 @@ import java.time.Instant;
 public class DateTimeUtils {
 
     // Extension-like method to convert LocalDateTime to Unix timestamp (in milliseconds)
-    public static long toTimestamp(LocalDateTime localDateTime) {
+    public static Long toTimestamp(LocalDateTime localDateTime) {
         if (localDateTime == null) {
             throw new IllegalArgumentException("LocalDateTime cannot be null");
         }

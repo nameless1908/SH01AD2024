@@ -60,8 +60,8 @@ public class AnnotationService {
                 .address(annotationDto.getAddress())
                 .latitude(annotationDto.getLatitude())
                 .longitude(annotationDto.getLongitude())
-                .createAt(new Date())
-                .updateAt(new Date())
+                .createAt(LocalDateTime.now())
+                .updateAt(LocalDateTime.now())
                 .owner(userDetails)
                 .build();
         annotationRepository.save(newAnnotation);

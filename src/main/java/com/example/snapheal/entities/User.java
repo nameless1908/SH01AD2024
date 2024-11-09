@@ -44,8 +44,10 @@ public class User implements UserDetails {
 	private String password;
 	private String avatar;
 
+	@Column(name = "current_latitude", columnDefinition = "DOUBLE")
 	private Double currentLatitude;
 
+	@Column(name = "current_longitude", columnDefinition = "DOUBLE")
 	private Double currentLongitude;
 
 	@CreationTimestamp

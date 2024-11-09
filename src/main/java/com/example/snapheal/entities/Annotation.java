@@ -20,8 +20,13 @@ public class Annotation {
 
     private String title; // Title provided by user
     private String name;  // Name of location
+
+    @Column(name = "latitude", columnDefinition = "DOUBLE")
     private Double latitude;
+
+    @Column(name = "longitude", columnDefinition = "DOUBLE")
     private Double longitude;
+
     private String address;
     private String thumbnail;
 
