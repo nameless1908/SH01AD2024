@@ -44,20 +44,17 @@ public class User implements UserDetails {
 	private String password;
 	private String avatar;
 
-	@Column(name = "current_latitude")
 	private Double currentLatitude;
 
-	@Column(name = "current_longitude")
 	private Double currentLongitude;
 
 	@CreationTimestamp
-	@Column(updatable = false, name = "created_at", columnDefinition = "timestamp(6)")
+	@Column(updatable = false)
 	private LocalDateTime createdAt;
 
 	@UpdateTimestamp
-	@Column(name = "updated_at", columnDefinition = "timestamp(6)")
 	private LocalDateTime updatedAt;
-	
+
 	@Override
 	public boolean isAccountNonExpired() {
 		return UserDetails.super.isAccountNonExpired();
