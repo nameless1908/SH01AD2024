@@ -1,6 +1,6 @@
-version: '3.8'
+#version: '3.8'
 
-services:
+#services:
 #  mysql:
 #    image: mysql:latest
 #    restart: always
@@ -15,16 +15,30 @@ services:
 #      start_period: 30s
 #      timeout: 10s
 
-  spring-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+#  spring-app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
 #    depends_on:
 #      - mysql
-    restart: always
-    ports:
+#    restart: always
+#    ports:
       - "8080:8080"
 #    environment:
 #      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/snapheal?createDatabaseIfNotExist=true
 #      SPRING_DATASOURCE_USERNAME: root
 #      SPRING_DATASOURCE_PASSWORD: khanh022002
+version: '3.8'
+
+services:
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://sql10.freesqldatabase.com:3306/sql12743710?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: sql12743710
+      SPRING_DATASOURCE_PASSWORD: AnxwydjNfz
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
