@@ -51,10 +51,11 @@ public class User implements UserDetails {
 	private Double currentLongitude;
 
 	@CreationTimestamp
-	@Column(updatable = false)
+	@Column(updatable = false, columnDefinition = "timestamp")
 	private LocalDateTime createdAt;
 
 	@UpdateTimestamp
+	@Column(columnDefinition = "timestamp")
 	private LocalDateTime updatedAt;
 
 	@Override

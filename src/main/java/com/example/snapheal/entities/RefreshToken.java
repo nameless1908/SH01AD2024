@@ -19,18 +19,24 @@ public class RefreshToken {
 
     private String tokenType;
     private String token;
+
+    @UpdateTimestamp
+    @Column(columnDefinition = "timestamp")
     private LocalDateTime tokenExpirationDate;
 
     private String refreshToken;
+
+    @UpdateTimestamp
+    @Column(columnDefinition = "timestamp")
     private LocalDateTime refreshTokenExpirationDate;
     private boolean revoked;
 
     @CreationTimestamp
-    @Column(updatable = false, name = "created_at")
+    @Column(updatable = false, name = "created_at", columnDefinition = "timestamp")
     private LocalDateTime createAt;
 
     @UpdateTimestamp
-    @Column(name = "update_at")
+    @Column(name = "update_at", columnDefinition = "timestamp")
     private LocalDateTime updateAt;
 
     @ManyToOne

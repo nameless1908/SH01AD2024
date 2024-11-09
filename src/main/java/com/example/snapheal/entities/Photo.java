@@ -4,6 +4,8 @@ import com.example.snapheal.Utils.DateTimeUtils;
 import com.example.snapheal.responses.PhotoResponse;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,7 +30,8 @@ public class Photo {
     private User createBy;
 
     // Thay thế Date bằng LocalDateTime
-    @Column(name = "create_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "create_at", nullable = false, columnDefinition = "timestamp")
     private LocalDateTime createAt;
 
     // Sử dụng LocalDateTime trong PhotoResponse

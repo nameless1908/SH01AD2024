@@ -35,10 +35,11 @@ public class Annotation {
     private User owner;
 
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(updatable = false, columnDefinition = "timestamp")
     private LocalDateTime createAt;
 
     @UpdateTimestamp
+    @Column(columnDefinition = "timestamp")
     private LocalDateTime updateAt;
 
     public AnnotationResponse mapToAnnotationResponse() {
