@@ -1,5 +1,6 @@
 package com.example.snapheal.entities;
 
+import com.example.snapheal.Utils.DateTimeUtils;
 import com.example.snapheal.responses.PhotoResponse;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,7 +36,7 @@ public class Photo {
         return PhotoResponse.builder()
                 .id(id)
                 .photoUrl(photoUrl)
-                .createAt(createAt != null ? Long.valueOf(createAt.toString()) : null) // Chuyển LocalDateTime sang String
+                .createAt(createAt != null ? DateTimeUtils.toTimestamp(createAt) : null) // Chuyển LocalDateTime sang String
                 .build();
     }
 

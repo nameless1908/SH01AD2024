@@ -1,9 +1,13 @@
 package com.example.snapheal.entities;
 
+import com.example.snapheal.Utils.DateTimeUtils;
 import com.example.snapheal.responses.AnnotationResponse;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -25,11 +29,12 @@ public class Annotation {
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createAt;
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updateAt;
+    @UpdateTimestamp
+    private LocalDateTime updateAt;
 
     public AnnotationResponse mapToAnnotationResponse() {
         return AnnotationResponse.builder()
@@ -41,8 +46,8 @@ public class Annotation {
                 .address(address)
                 .thumbnail(thumbnail)
                 .owner(owner.mapToFriendResponse())
-                .createAt(createAt != null ? createAt.getTime() : null)
-                .updateAt(updateAt != null ? updateAt.getTime() : null)
+                .createAt(createAt != null ? DateTimeUtils.toTimestamp(createAt) : null)
+                .updateAt(updateAt != null ? DateTimeUtils.toTimestamp(createAt) : null)
                 .build();
     }
 }
