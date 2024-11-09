@@ -1,6 +1,7 @@
 package com.example.snapheal.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.example.snapheal.exceptions.CustomErrorException;
@@ -46,7 +47,7 @@ public class FriendRequestService {
     	Long requesterId = requester.getId();
     	Long receiverId = receiver.getId();
     	
-        if (requesterId == receiverId) {
+        if (Objects.equals(requesterId, receiverId)) {
             throw new CustomErrorException("Cannot send a friend request to yourself.");
         }
 
@@ -61,6 +62,12 @@ public class FriendRequestService {
             throw new CustomErrorException("A friend request has already been sent.");
         }
 
+        Optional<FriendRequest> reverseRequest = friendRequestRepository
+                .findByRequesterAndReceiverAndStatus(receiverId, requesterId, FriendStatus.PENDING);
+        if (reverseRequest.isPresent()) {
+            throw new CustomErrorException("The recipient has already sent a friend request.");
+        }
+
         Optional<FriendRequest> existingRejectedRequest = friendRequestRepository
                 .findByRequesterAndReceiverAndStatus(requesterId, receiverId, FriendStatus.REJECTED);
         if (existingRejectedRequest.isPresent()) {
@@ -68,11 +75,15 @@ public class FriendRequestService {
             rejectedRequest.setStatus(FriendStatus.PENDING); 
             return friendRequestRepository.save(rejectedRequest);
         }
-        
-        Optional<FriendRequest> reverseRequest = friendRequestRepository
-                .findByRequesterAndReceiverAndStatus(receiverId, requesterId, FriendStatus.PENDING);
-        if (reverseRequest.isPresent()) {
-            throw new CustomErrorException("The recipient has already sent a friend request.");
+
+        Optional<FriendRequest> requesterReject = friendRequestRepository
+                .findByRequesterAndReceiverAndStatus(receiverId, requesterId, FriendStatus.REJECTED);
+        if (requesterReject.isPresent()) {
+            FriendRequest rejectedRequest = requesterReject.get();
+            rejectedRequest.setStatus(FriendStatus.PENDING);
+            rejectedRequest.setRequester(requester);
+            rejectedRequest.setReceiver(receiver);
+            return friendRequestRepository.save(rejectedRequest);
         }
 
         FriendRequest friendRequest = new FriendRequest();
