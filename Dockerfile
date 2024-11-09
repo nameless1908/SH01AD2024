@@ -15,3 +15,5 @@ EXPOSE 8080
 
 # Chỉ định command để chạy ứng dụng khi container khởi chạy
 CMD ["java", "-jar", "app.jar"]
+
+#docker-compose up --build  // Nếu bạn đã chỉnh sửa các file mà cần đóng gói vào image (như code Java hoặc file cấu hình), bạn sẽ cần rebuild lại image. Chạy lệnh này giúp đảm bảo mọi thay đổi trong mã nguồn đều được cập nhật
