@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EntityScan("com.example.snapheal.entity")
+@EntityScan("com.example.snapheal.entities")
 @EnableJpaRepositories("com.example.snapheal.repository")
 public class SnaphealApplication {
 
