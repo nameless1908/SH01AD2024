@@ -13,6 +13,8 @@ import java.util.Date;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Annotation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

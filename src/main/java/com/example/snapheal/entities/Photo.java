@@ -31,6 +31,7 @@ public class Photo {
 
     // Thay thế Date bằng LocalDateTime
     @CreationTimestamp
+
     @Column(name = "create_at", nullable = false, columnDefinition = "timestamp")
     private LocalDateTime createAt;
 
