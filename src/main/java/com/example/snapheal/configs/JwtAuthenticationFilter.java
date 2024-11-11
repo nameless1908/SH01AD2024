@@ -5,8 +5,10 @@ import com.example.snapheal.exceptions.TokenInvalidException;
 import com.example.snapheal.repository.RefreshTokenRepository;
 import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.service.JwtService;
+import com.example.snapheal.service.RateLimiterService;
 import com.example.snapheal.service.RefreshTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.bucket4j.Bucket;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -37,7 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
-
+    @Autowired
+    private RateLimiterService rateLimiterService;
     public JwtAuthenticationFilter(
             JwtService jwtService,
             UserDetailsService userDetailsService,
@@ -54,6 +57,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+
+        String clientIP = request.getRemoteAddr();
+        Bucket bucket = rateLimiterService.resolveBucket(clientIP);
+
+        if (!bucket.tryConsume(1)) {
+            // Trả về mã lỗi 429 nếu quá giới hạn tần suất
+            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(new ObjectMapper().writeValueAsString(
+                    ResponseObject.builder()
+                            .status(HttpStatus.TOO_MANY_REQUESTS)
+                            .code(HttpStatus.TOO_MANY_REQUESTS.value())
+                            .message("Too many requests")
+                            .data(null)
+                            .build()
+            ));
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
