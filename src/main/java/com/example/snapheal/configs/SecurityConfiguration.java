@@ -48,7 +48,10 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 String.format("%s/auth/register", apiPrefix),
                                 String.format("%s/auth/login", apiPrefix),
-                                String.format("%s/auth/refresh-token", apiPrefix)
+                                String.format("%s/auth/refresh-token", apiPrefix),
+                                String.format("%s/auth/send-otp", apiPrefix),
+                                String.format("%s/auth/verify-otp", apiPrefix),
+                                String.format("%s/auth/reset-password", apiPrefix)
                         ).permitAll()
 
                         // Require authentication for any other request

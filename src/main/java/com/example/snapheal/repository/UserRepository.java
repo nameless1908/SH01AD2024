@@ -29,6 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	List<Object[]> searchUsersWithFriendStatus(@Param("currentUserId") Long currentUserId, @Param("searchTerm") String searchTerm);
 
 	Optional<User> findByEmail(String email);
+
 	Optional<User> findByUsername(String username);
 	@Query("SELECT u FROM User u WHERE u.email = :email OR u.username = :username")
 	Optional<User> findByEmailOrUsername(@Param("email") String email, @Param("username") String username);

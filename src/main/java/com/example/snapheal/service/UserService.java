@@ -40,7 +40,9 @@ public class UserService {
 	public Optional<User> findUserById(Long id) {
         return userRepository.findById(id);
     }
-	
+	public Optional<User> findUserByEmail(String email) {
+		return userRepository.findByEmail(email);
+	}
 	public List<UserResponse> searchUserWithFriendRequestStatus(Long currentUserId, String searchTerm) {
 	    List<Object[]> list = userRepository.searchUsersWithFriendStatus(currentUserId, searchTerm);
 	    List<UserResponse> userResponses = list.stream()

@@ -1,26 +1,21 @@
 package com.example.snapheal.controller;
 
-import com.example.snapheal.dtos.LoginUserDto;
-import com.example.snapheal.dtos.RefreshTokenDto;
-import com.example.snapheal.dtos.RegisterUserDto;
+import com.example.snapheal.dtos.*;
+import com.example.snapheal.entities.OTPToken;
 import com.example.snapheal.entities.RefreshToken;
 import com.example.snapheal.entities.User;
+import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.responses.LoginResponse;
 import com.example.snapheal.responses.ResponseObject;
-import com.example.snapheal.service.AuthenticationService;
-import com.example.snapheal.service.JwtService;
-import com.example.snapheal.service.RefreshTokenService;
-import com.example.snapheal.service.UserService;
+import com.example.snapheal.responses.VerifyOTPResponse;
+import com.example.snapheal.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("${api.prefix}/auth")
 @RestController
@@ -33,6 +28,10 @@ public class AuthenticationController {
     private final RefreshTokenService refreshTokenService;
 
     private final UserService userService;
+    @Autowired
+    private OTPTokenService otpTokenService;
+    @Autowired
+    private EmailService emailService;
 
     public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService, RefreshTokenService refreshTokenService, UserService userService) {
         this.jwtService = jwtService;
@@ -133,6 +132,73 @@ public class AuthenticationController {
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .data(loginResponse)
+                        .build()
+        );
+    }
+
+
+    // Reset Password
+    @GetMapping("/send-otp")
+    public ResponseEntity<ResponseObject> authenticate(@RequestParam String email) throws Exception {
+        OTPToken otpToken = otpTokenService.createNewOTPToken(email);
+        emailService.sendResetPasswordEmail(otpToken.getUser().getEmail(), otpToken.getToken());
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .data(true)
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message("Send email successfully!")
+                        .build()
+        );
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ResponseObject> verifyOtp(@RequestBody VerifyOTPDto verifyOTPDto) throws Exception {
+        String uuidString = otpTokenService.validateToken(verifyOTPDto.getEmail(), verifyOTPDto.getOtpToken());
+        VerifyOTPResponse response = VerifyOTPResponse.builder()
+                .verifyOTPToken(uuidString)
+                .build();
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .data(response)
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message("OTP Verified!")
+                        .build()
+        );
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ResponseObject> verifyOtp(@RequestBody ResetPasswordDto resetPasswordDto) throws Exception {
+        Boolean verifyTokenValid = otpTokenService.validateVerifyOTPToken(resetPasswordDto.getEmail(), resetPasswordDto.getVerifyOTPToken());
+        if (!verifyTokenValid) {
+            throw new CustomErrorException("Verify Token not match!");
+        }
+        User user = userService.findUserByEmail(resetPasswordDto.getEmail()).orElseThrow(
+                () -> new CustomErrorException("Not found user by email!")
+        );
+        user.setPassword(resetPasswordDto.getNewPassword());
+        String jwtToken = jwtService.generateToken(user);
+        ;
+        RefreshToken refreshToken = refreshTokenService.save(user, jwtToken);
+
+        LoginResponse loginResponse = LoginResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .avatar(user.getAvatar())
+                .token(jwtToken)
+                .refreshToken(refreshToken.getRefreshToken())
+                .tokenType("Bearer ")
+                .build();
+
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .data(loginResponse)
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .message("Successfully!")
                         .build()
         );
     }
