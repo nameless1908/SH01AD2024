@@ -15,11 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("${api.prefix}/auth")
 @RestController
 public class AuthenticationController {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final JwtService jwtService;
 
@@ -177,11 +180,11 @@ public class AuthenticationController {
         User user = userService.findUserByEmail(resetPasswordDto.getEmail()).orElseThrow(
                 () -> new CustomErrorException("Not found user by email!")
         );
-        user.setPassword(resetPasswordDto.getNewPassword());
+        user.setPassword(passwordEncoder.encode(resetPasswordDto.getNewPassword()));
         String jwtToken = jwtService.generateToken(user);
         ;
         RefreshToken refreshToken = refreshTokenService.save(user, jwtToken);
-
+        userService.save(user);
         LoginResponse loginResponse = LoginResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())

@@ -37,6 +37,9 @@ public class UserService {
 	@Autowired
 	private FriendRequestService friendRequestService;
 
+	public void save(User user) {
+		userRepository.save(user);
+	}
 	public Optional<User> findUserById(Long id) {
         return userRepository.findById(id);
     }
