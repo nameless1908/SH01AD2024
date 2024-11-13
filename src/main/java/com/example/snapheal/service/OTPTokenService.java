@@ -53,11 +53,15 @@ public class OTPTokenService {
         );
 
         OTPToken otpToken = otpTokeRepository.findByTokenAndUserAndIsNotRevoked(token, user).orElseThrow(
-                () -> new CustomErrorException("Token Invalid!")
+                () -> new CustomErrorException("OTP wrong!")
         );
 
         if (otpToken.isExpiredToken()) {
-            throw new CustomErrorException("Token Expired!");
+            throw new CustomErrorException("OTP Expired!");
+        }
+
+        if (!otpToken.getVerifyToken().isEmpty()) {
+            throw new CustomErrorException("OTP is Verified!");
         }
 
         String verifyToken = UUID.randomUUID().toString();
@@ -68,7 +72,7 @@ public class OTPTokenService {
 
     public Boolean validateVerifyOTPToken(String email, String verifyToken) {
         OTPToken otpToken = otpTokeRepository.findActiveTokenByEmail(email).orElseThrow(
-                () -> new CustomErrorException("Not found active OTPToken by email!")
+                () -> new CustomErrorException("Not found active OTP Token by email!")
         );
         return passwordEncoder.matches(verifyToken, otpToken.getVerifyToken());
     }
