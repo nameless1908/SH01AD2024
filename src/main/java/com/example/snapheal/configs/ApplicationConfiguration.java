@@ -1,6 +1,7 @@
 package com.example.snapheal.configs;
 
 import com.example.snapheal.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -49,13 +50,22 @@ public class ApplicationConfiguration {
         return authProvider;
     }
 
+    @Value("${MAIL_HOST}")
+    private String mailHost;
+    @Value("${MAIL_PORT}")
+    private int mailPort;
+    @Value("${MAIL_USERNAME}")
+    private String mailUsername;
+    @Value("${MAIL_PASSWORD}")
+    private String mailPassword;
+
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
-        mailSender.setUsername("vuvankhanh022002@gmail.com");
-        mailSender.setPassword("ddkb trvv tifc mfuh");
+        mailSender.setHost(mailHost);
+        mailSender.setPort(mailPort);
+        mailSender.setUsername(mailUsername);
+        mailSender.setPassword(mailPassword);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

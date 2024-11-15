@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,7 @@ public class AnnotationService {
                 .createAt(LocalDateTime.now())
                 .updateAt(LocalDateTime.now())
                 .owner(userDetails)
+                .createAt(LocalDateTime.now())
                 .build();
         annotationRepository.save(newAnnotation);
         if (!annotationDto.getImages().isEmpty()) {
@@ -121,6 +123,7 @@ public class AnnotationService {
                 AnnotationTag newAnnotationTag = AnnotationTag.builder()
                         .annotation(newAnnotation)
                         .taggedUser(userTagged.get())
+                        .createAt(LocalDateTime.now())
                         .build();
                 annotationTagService.save(newAnnotationTag);
                 String cacheKey = annotationsCache(userTagged.get().getId());
@@ -220,6 +223,7 @@ public class AnnotationService {
             AnnotationTag newAnnotationTag = AnnotationTag.builder()
                     .taggedUser(user)
                     .annotation(annotation)
+                    .createAt(LocalDateTime.now())
                     .build();
             annotationTagService.save(newAnnotationTag);
         }

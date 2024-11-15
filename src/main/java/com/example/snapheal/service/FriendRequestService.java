@@ -1,5 +1,6 @@
 package com.example.snapheal.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -72,7 +73,8 @@ public class FriendRequestService {
                 .findByRequesterAndReceiverAndStatus(requesterId, receiverId, FriendStatus.REJECTED);
         if (existingRejectedRequest.isPresent()) {
             FriendRequest rejectedRequest = existingRejectedRequest.get();
-            rejectedRequest.setStatus(FriendStatus.PENDING); 
+            rejectedRequest.setStatus(FriendStatus.PENDING);
+            rejectedRequest.setUpdatedAt(LocalDateTime.now());
             return friendRequestRepository.save(rejectedRequest);
         }
 
@@ -83,6 +85,7 @@ public class FriendRequestService {
             rejectedRequest.setStatus(FriendStatus.PENDING);
             rejectedRequest.setRequester(requester);
             rejectedRequest.setReceiver(receiver);
+            rejectedRequest.setUpdatedAt(LocalDateTime.now());
             return friendRequestRepository.save(rejectedRequest);
         }
 
@@ -90,7 +93,8 @@ public class FriendRequestService {
         friendRequest.setRequester(requester);
         friendRequest.setReceiver(receiver);
         friendRequest.setStatus(FriendStatus.PENDING);
-
+        friendRequest.setCreatedAt(LocalDateTime.now());
+        friendRequest.setUpdatedAt(LocalDateTime.now());
         return friendRequestRepository.save(friendRequest);
     }
     
@@ -100,7 +104,8 @@ public class FriendRequestService {
         FriendRequest friendRequest = friendRequestRepository.findRequestByRequesterId(userDetails.getId(), requesterId).orElseThrow(
                 () -> new CustomErrorException("Not found requester by requestID")
         );
-        friendRequest.setStatus(FriendStatus.ACCEPTED);  
+        friendRequest.setStatus(FriendStatus.ACCEPTED);
+        friendRequest.setUpdatedAt(LocalDateTime.now());
         friendRequestRepository.save(friendRequest);  
 
         Friend friend = new Friend(friendRequest.getRequester(), friendRequest.getReceiver());
@@ -113,7 +118,8 @@ public class FriendRequestService {
         FriendRequest friendRequest = friendRequestRepository.findRequestByRequesterId(userDetails.getId(), requesterId).orElseThrow(
                 () -> new CustomErrorException("Not found requester by requestID")
         );
-        friendRequest.setStatus(FriendStatus.REJECTED);  
+        friendRequest.setStatus(FriendStatus.REJECTED);
+        friendRequest.setUpdatedAt(LocalDateTime.now());
         friendRequestRepository.save(friendRequest);  
     }
     

@@ -8,6 +8,10 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @Getter
@@ -31,5 +35,11 @@ public class FriendRequest {
 
     @Enumerated(EnumType.STRING)  // Sử dụng EnumType.STRING để lưu trữ giá trị enum dưới dạng chuỗi
     private FriendStatus status;
-    
+    @CreationTimestamp
+    @Column(updatable = false, columnDefinition = "timestamp")
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(columnDefinition = "timestamp")
+    private LocalDateTime updatedAt;
 }
