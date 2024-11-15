@@ -42,14 +42,8 @@ public class User implements UserDetails {
 	private String fullName;
 
 	@Column(nullable = false)
-	private String password;
-	private String avatar;
-
-	@Column(name = "current_latitude", columnDefinition = "double")
-	private Double currentLatitude;
-
-	@Column(name = "current_longitude", columnDefinition = "double")
-	private Double currentLongitude;
+    private String password;
+    private String avatar;
 
 	@CreationTimestamp
 	@Column(updatable = false, columnDefinition = "timestamp")
@@ -99,7 +93,7 @@ public class User implements UserDetails {
 				.status(status)
 				.build();
 	}
-
+	
 	public FriendRequestResponse mapToFriendRequestResponse(FriendStatus status) {
 		return FriendRequestResponse.builder()
 				.id(id)
@@ -109,7 +103,7 @@ public class User implements UserDetails {
 				.status(status)
 				.build();
 	}
-
+	
 	public ProfileResponse mapToProfileResponse() {
 		return ProfileResponse.builder()
 				.id(id)
@@ -117,8 +111,6 @@ public class User implements UserDetails {
 				.username(username)
 				.fullName(fullName)
 				.email(email)
-				.currentLongitude(currentLongitude)
-				.currentLatitude(currentLatitude)
 				.build();
 	}
 
