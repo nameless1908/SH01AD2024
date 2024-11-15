@@ -111,7 +111,7 @@ public class UserService {
 		}
 		if (existToken.getTokenExpirationDate().isBefore(LocalDateTime.now())) {
 			existToken.setRevoked(true);
-			existToken.setUpdateAt(new Date());
+			existToken.setUpdateAt(LocalDateTime.now());
 			refreshTokenService.save(existToken);
 		}
 		return existToken.getUser();

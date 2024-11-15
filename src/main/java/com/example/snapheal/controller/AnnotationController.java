@@ -7,6 +7,7 @@ import com.example.snapheal.responses.AnnotationDetailResponse;
 import com.example.snapheal.responses.AnnotationResponse;
 import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.service.AnnotationService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class AnnotationController {
     private AnnotationService annotationService;
 
     @GetMapping("/list")
-    public ResponseEntity<ResponseObject> getListAnnotation() {
+    public ResponseEntity<ResponseObject> getListAnnotation() throws JsonProcessingException {
         List<AnnotationResponse> annotations = annotationService.getList();
 
         return  ResponseEntity.ok(
@@ -48,7 +49,7 @@ public class AnnotationController {
     }
 
     @GetMapping("/detail")
-    public ResponseEntity<ResponseObject> getAnnotationDetail(@RequestParam Long annotationId) {
+    public ResponseEntity<ResponseObject> getAnnotationDetail(@RequestParam Long annotationId) throws JsonProcessingException {
         AnnotationDetailResponse response = annotationService.getDetail(annotationId);
         return ResponseEntity.ok(
                 ResponseObject.builder()

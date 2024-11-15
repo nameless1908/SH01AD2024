@@ -1,5 +1,6 @@
 package com.example.snapheal.entities;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -21,38 +22,42 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Data
-@Getter
-@Setter
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(nullable = false)
-    private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(nullable = false)
+	private Long id;
+
+	@Column(unique = true, nullable = false)
+	private String email;
 
 	@Column(unique = true, nullable = false)
 	private String username;
 
 	private String fullName;
+
 	@Column(nullable = false)
-    private String password;
-    private String avatar;
-    private Double currentLatitude;
-    private Double currentLongitude;
-    
+	private String password;
+	private String avatar;
+
+	@Column(name = "current_latitude", columnDefinition = "double")
+	private Double currentLatitude;
+
+	@Column(name = "current_longitude", columnDefinition = "double")
+	private Double currentLongitude;
+
 	@CreationTimestamp
-	@Column(updatable = false, name = "created_at")
-	private Date createdAt;
+	@Column(updatable = false, columnDefinition = "timestamp")
+	private LocalDateTime createdAt;
 
 	@UpdateTimestamp
-	@Column(name = "updated_at")
-	private Date updatedAt;
+	@Column(columnDefinition = "timestamp")
+	private LocalDateTime updatedAt;
 
 	@Override
 	public boolean isAccountNonExpired() {
@@ -94,7 +99,7 @@ public class User implements UserDetails {
 				.status(status)
 				.build();
 	}
-	
+
 	public FriendRequestResponse mapToFriendRequestResponse(FriendStatus status) {
 		return FriendRequestResponse.builder()
 				.id(id)
@@ -104,7 +109,7 @@ public class User implements UserDetails {
 				.status(status)
 				.build();
 	}
-	
+
 	public ProfileResponse mapToProfileResponse() {
 		return ProfileResponse.builder()
 				.id(id)

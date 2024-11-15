@@ -9,23 +9,25 @@ import com.example.snapheal.entities.Photo;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.repository.AnnotationRepository;
-import com.example.snapheal.repository.AnnotationTagRepository;
-import com.example.snapheal.repository.PhotoRepository;
 import com.example.snapheal.responses.AnnotationDetailResponse;
 import com.example.snapheal.responses.AnnotationResponse;
 import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.PhotoResponse;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,12 +46,47 @@ public class AnnotationService {
     @Autowired
     private PhotoService photoService;
 
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    private String annotationsCache(Long id) {
+        return "annotations:" + id;
+    }
+
+    private String annotationDetailsCacheKey(Long id) {
+        return "annotationDetail:" + id;
+    }
+
     // Caches the list of annotations for the user.
-    @Cacheable(value = "annotations", key = "#userDetails.id")
-    public List<AnnotationResponse> getList() {
+    public List<AnnotationResponse> getList() throws JsonProcessingException {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userDetails.getId());
-        return annotations.stream().map(Annotation::mapToAnnotationResponse).collect(Collectors.toList());
+        String cacheKey = annotationsCache(userDetails.getId());
+
+        // Kiểm tra xem cache có dữ liệu không
+        if (redisTemplate.hasKey(cacheKey)) {
+            // Trả về dữ liệu từ cache, deserialize lại thành List<AnnotationResponse>
+            String json = (String) redisTemplate.opsForValue().get(cacheKey);
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(json, new TypeReference<List<AnnotationResponse>>() {
+            });
+        } else {
+            // Nếu không có, lấy dữ liệu từ DB và cache lại
+            List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userDetails.getId());
+            List<AnnotationResponse> response = annotations.stream()
+                    .map(Annotation::mapToAnnotationResponse)
+                    .collect(Collectors.toList());
+
+            // Lưu dữ liệu vào Redis dưới dạng JSON
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(response);
+                redisTemplate.opsForValue().set(cacheKey, json);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
+            return response;
+        }
     }
 
     public List<AnnotationResponse> search(String query) {
@@ -59,7 +96,6 @@ public class AnnotationService {
     }
 
     // Clear the cache when a new annotation is created
-    @CacheEvict(value = "annotations", key = "#userDetails.id", allEntries = true)
     @Transactional
     public boolean createAnnotation(AnnotationDto annotationDto) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -70,8 +106,8 @@ public class AnnotationService {
                 .address(annotationDto.getAddress())
                 .latitude(annotationDto.getLatitude())
                 .longitude(annotationDto.getLongitude())
-                .createAt(new Date())
-                .updateAt(new Date())
+                .createAt(LocalDateTime.now())
+                .updateAt(LocalDateTime.now())
                 .owner(userDetails)
                 .build();
         annotationRepository.save(newAnnotation);
@@ -87,6 +123,8 @@ public class AnnotationService {
                         .taggedUser(userTagged.get())
                         .build();
                 annotationTagService.save(newAnnotationTag);
+                String cacheKey = annotationsCache(userTagged.get().getId());
+                redisTemplate.delete(cacheKey);
             }
         }
 
@@ -95,36 +133,54 @@ public class AnnotationService {
                     .annotation(newAnnotation)
                     .createBy(userDetails)
                     .photoUrl(image)
-                    .createAt(new Date())
+                    .createAt(LocalDateTime.now())
                     .build();
             photoService.save(photo);
         }
+
+        redisTemplate.delete(annotationsCache(userDetails.getId()));
         return true;
     }
 
     // Caches annotation details by annotation ID.
-    @Cacheable(value = "annotationDetails", key = "#annotationId")
-    public AnnotationDetailResponse getDetail(Long annotationId) {
+    public AnnotationDetailResponse getDetail(Long annotationId) throws JsonProcessingException {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String cacheKey = annotationDetailsCacheKey(annotationId);
 
-        Annotation annotation = annotationRepository.findById(annotationId).orElseThrow(
-                () -> new CustomErrorException("Can not found Annotation with id: " + annotationId)
-        );
-
-        List<PhotoResponse> photoResponses = photoService.getPhotosByAnnotationId(annotationId);
-
-        AnnotationDetailResponse response = AnnotationDetailResponse.builder()
-                .info(annotation.mapToAnnotationResponse())
-                .photos(photoResponses)
-                .build();
-        if (Objects.equals(annotation.getOwner().getId(), userDetails.getId())) {
-            List<FriendResponse> friendTagged = annotationTagService.getListAnnotationTagByAnnotationId(annotationId);
-            response.setFriendTagged(friendTagged);
+        // Check if the cache exists
+        if (redisTemplate.hasKey(cacheKey)) {
+            // Retrieve cached data as a JSON string and deserialize it into AnnotationDetailResponse
+            String cachedJson = (String) redisTemplate.opsForValue().get(cacheKey);
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(cachedJson, AnnotationDetailResponse.class);
         } else {
-            response.setFriendTagged(new ArrayList<>());
-        }
+            // Fetch data from the database
+            Annotation annotation = annotationRepository.findById(annotationId).orElseThrow(
+                    () -> new CustomErrorException("Cannot find Annotation with id: " + annotationId)
+            );
 
-        return response;
+            List<PhotoResponse> photoResponses = photoService.getPhotosByAnnotationId(annotationId);
+
+            // Prepare the response object
+            AnnotationDetailResponse response = AnnotationDetailResponse.builder()
+                    .info(annotation.mapToAnnotationResponse())
+                    .photos(photoResponses)
+                    .build();
+
+            // Set friend tagged data for the owner
+            if (Objects.equals(annotation.getOwner().getId(), userDetails.getId())) {
+                List<FriendResponse> friendTagged = annotationTagService.getListAnnotationTagByAnnotationId(annotationId);
+                response.setFriendTagged(friendTagged);
+            } else {
+                response.setFriendTagged(new ArrayList<>());
+            }
+
+            // Serialize response object to JSON and cache it
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonResponse = objectMapper.writeValueAsString(response);
+            redisTemplate.opsForValue().set(cacheKey, jsonResponse);
+            return response;
+        }
     }
 
     public void updateFriendTagged(UpdateFriendAnnotationDto dto) {
@@ -154,7 +210,6 @@ public class AnnotationService {
         // Xóa các friend không còn tồn tại trong danh sách mới
         for (Long friendId : friendsToRemove) {
             annotationTagService.delete(friendId);
-            evictUserCache(friendId);  // Xóa cache cho friend bị xóa
         }
 
         // Thêm các friend mới vào danh sách
@@ -167,17 +222,11 @@ public class AnnotationService {
                     .annotation(annotation)
                     .build();
             annotationTagService.save(newAnnotationTag);
-            evictUserCache(friendId);  // Xóa cache cho friend mới được thêm
         }
-    }
-
-    @CacheEvict(value = "annotations", key = "#userId")
-    public void evictUserCache(Long userId) {
-        // Phương thức này để xóa cache cho một user cụ thể
+        redisTemplate.delete(annotationDetailsCacheKey(dto.getAnnotationId()));  // Xóa cache cho annotation detail
     }
 
     // Clear specific cache entry when updating images
-    @CacheEvict(value = "annotationDetails", key = "#dto.annotationId")
     public void updateImages(UpdateAnnotationImagesDto dto) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -207,10 +256,11 @@ public class AnnotationService {
             Photo photo = Photo.builder()
                     .annotation(annotation)
                     .photoUrl(img)
-                    .createAt(new Date())
+                    .createAt(LocalDateTime.now())
                     .createBy(userDetails)
                     .build();
             photoService.save(photo);
         }
+        redisTemplate.delete(annotationDetailsCacheKey(dto.getAnnotationId()));
     }
 }

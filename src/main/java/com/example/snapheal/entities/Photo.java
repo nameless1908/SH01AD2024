@@ -1,28 +1,20 @@
 package com.example.snapheal.entities;
-import com.example.snapheal.responses.FriendResponse;
+
+import com.example.snapheal.Utils.DateTimeUtils;
 import com.example.snapheal.responses.PhotoResponse;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Data
-@Getter
-@Setter
 @Entity
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Photo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,18 +22,33 @@ public class Photo {
     @ManyToOne
     @JoinColumn(name = "annotation_id")
     private Annotation annotation;
+
     private String photoUrl;
 
     @ManyToOne
     @JoinColumn(name = "create_by")
     private User createBy;
-    private Date createAt;
 
+    // Thay thế Date bằng LocalDateTime
+    @CreationTimestamp
+
+    @Column(name = "create_at", nullable = false, columnDefinition = "timestamp")
+    private LocalDateTime createAt;
+
+    // Sử dụng LocalDateTime trong PhotoResponse
     public PhotoResponse mapToPhotoResponse() {
         return PhotoResponse.builder()
                 .id(id)
                 .photoUrl(photoUrl)
-                .createAt(createAt.getTime())
+                .createAt(createAt != null ? DateTimeUtils.toTimestamp(createAt) : null) // Chuyển LocalDateTime sang String
                 .build();
+    }
+
+    // Gán giá trị cho createAt trước khi persist
+    @PrePersist
+    public void prePersist() {
+        if (createAt == null) {
+            createAt = LocalDateTime.now();  // Set createAt khi chưa được gán
+        }
     }
 }
