@@ -43,8 +43,6 @@ public class User implements UserDetails {
 	@Column(nullable = false)
     private String password;
     private String avatar;
-    private Double currentLatitude;
-    private Double currentLongitude;
     
 	@CreationTimestamp
 	@Column(updatable = false, name = "created_at")
@@ -112,8 +110,6 @@ public class User implements UserDetails {
 				.username(username)
 				.fullName(fullName)
 				.email(email)
-				.currentLongitude(currentLongitude)
-				.currentLatitude(currentLatitude)
 				.build();
 	}
 

@@ -17,6 +17,4 @@ public class ProfileResponse {
 	private String fullName;
 	private String email;
 	private String avatar;
-	private Double currentLatitude;
-    private Double currentLongitude;
 }

@@ -1,26 +1,19 @@
 package com.example.snapheal.service;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.example.snapheal.dtos.UpdateCurrentLocationDto;
 import com.example.snapheal.dtos.UpdateUserDto;
-import com.example.snapheal.entities.FriendRequest;
-import com.example.snapheal.entities.FriendStatus;
-import com.example.snapheal.entities.RefreshToken;
-import com.example.snapheal.entities.Status;
+import com.example.snapheal.entities.*;
 import com.example.snapheal.exceptions.CustomErrorException;
 import com.example.snapheal.exceptions.TokenInvalidException;
+import com.example.snapheal.repository.UserLocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.UserRepository;
 import com.example.snapheal.responses.ProfileResponse;
 import com.example.snapheal.responses.UserDistanceResponse;
@@ -30,10 +23,16 @@ import com.example.snapheal.responses.UserResponse;
 public class UserService {
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private UserLocationRepository userLocationRepository;
+
 	@Autowired
 	private RefreshTokenService refreshTokenService;
+
 	@Autowired
 	private JwtService jwtService;
+
 	@Autowired
 	private FriendRequestService friendRequestService;
 
@@ -74,10 +73,9 @@ public class UserService {
 	
 	public List<ProfileResponse> getProfileUser(Long userId){
 		Optional<User> users = userRepository.findById(userId);
-		List<ProfileResponse> profileResponses = users.stream()
-				.map(User::mapToProfileResponse).toList();
-		
-		return profileResponses;
+
+        return users.stream()
+                .map(User::mapToProfileResponse).toList();
 	}
 	
 	public User updateUser(UpdateUserDto dto) {
@@ -162,24 +160,34 @@ public class UserService {
 
 	
 	public List<UserDistanceResponse> findNearbyUsers(Long currentUserId) {
-	    User currentUser = userRepository.findById(currentUserId)
-	            .orElseThrow(() -> new CustomErrorException("User not found"));
+//	    User currentUser = userRepository.findById(currentUserId)
+//	            .orElseThrow(() -> new CustomErrorException("User not found"));
+		Optional<UserLocation> userLocation = userLocationRepository.findByUserId(currentUserId);
 
-	    double currentLat = currentUser.getCurrentLatitude();
-	    double currentLng = currentUser.getCurrentLongitude();
+		if (userLocation.isEmpty()) {
+			return List.of();
+		}
+		double currentLat = userLocation.get().getCurrentLatitude();
+		double currentLng = userLocation.get().getCurrentLongitude();
+		List<User> potentialFriends = userRepository.findUsersExcludingFriendsAndPendingRequests(currentUserId);
 
-	    List<User> potentialFriends = userRepository.findUsersExcludingFriendsAndPendingRequests(currentUserId);
+		List<UserDistanceResponse> userDistanceResponses = new ArrayList<>();
 
-	    return potentialFriends.stream()
-	            .map(user -> {
-	                double distance = distanceBetween2Points(currentLat, currentLng,
-	                        user.getCurrentLatitude(), user.getCurrentLongitude());
-	                return new UserDistanceResponse(user.getId(), user.getUsername(), user.getFullName(),
-	                        user.getAvatar(), distance);
-	            })
-	            .sorted(Comparator.comparingDouble(UserDistanceResponse::getDistance))
-	            .limit(20)
-	            .collect(Collectors.toList());
+		for(User user: potentialFriends) {
+			Optional<UserLocation> location = userLocationRepository.findByUserId(user.getId());
+			if (location.isEmpty()) {
+				break;
+			}
+			double distance = distanceBetween2Points(currentLat, currentLng,
+					location.get().getCurrentLatitude(), location.get().getCurrentLongitude());
+			userDistanceResponses.add(new UserDistanceResponse(user.getId(), user.getUsername(), user.getFullName(),
+					user.getAvatar(), distance));
+		}
+
+		return userDistanceResponses.stream()
+				.sorted(Comparator.comparingDouble(UserDistanceResponse::getDistance))
+				.limit(20)
+				.collect(Collectors.toList());
 	}
 
 	public static double distanceBetween2Points(double la1, double lo1, double la2, double lo2) {
@@ -191,18 +199,26 @@ public class UserService {
 	    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(la1ToRad)
 	                * Math.cos(la2ToRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
 	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	    double d = R * c;
-	    return d;
+        return R * c;
 	}
 	
 	public void updateLocation(UpdateCurrentLocationDto dto) {
 		 User user = userRepository.findById(dto.getId()).orElseThrow(
 		            () -> new CustomErrorException("Can not found User with id: " + dto.getId())
 		    );
-		 
-		 user.setCurrentLatitude(dto.getCurrentLatitude());
-		 user.setCurrentLongitude(dto.getCurrentLongitude());
-		 
-		 userRepository.save(user);	 
+
+		Optional<UserLocation> userLocation = userLocationRepository.findByUserId(dto.getId());
+		if (userLocation.isPresent()) {
+			userLocation.get().setCurrentLatitude(dto.getCurrentLatitude());
+			userLocation.get().setCurrentLongitude(dto.getCurrentLongitude());
+
+			userLocationRepository.save(userLocation.get());
+		} else {
+			UserLocation newUserLocation = new UserLocation();
+			newUserLocation.setUser(user);
+			newUserLocation.setCurrentLongitude(dto.getCurrentLongitude());
+			newUserLocation.setCurrentLatitude(dto.getCurrentLatitude());
+			userLocationRepository.save(newUserLocation);
+		}
 	}
 }
