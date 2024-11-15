@@ -18,6 +18,8 @@ import com.example.snapheal.responses.PhotoResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
@@ -41,9 +43,9 @@ public class AnnotationService {
 
     @Autowired
     private PhotoService photoService;
-    @PersistenceContext
-    private EntityManager entityManager;
 
+    // Caches the list of annotations for the user.
+    @Cacheable(value = "annotations", key = "#userDetails.id")
     public List<AnnotationResponse> getList() {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userDetails.getId());
@@ -56,6 +58,8 @@ public class AnnotationService {
         return annotations.stream().map(Annotation::mapToAnnotationResponse).collect(Collectors.toList());
     }
 
+    // Clear the cache when a new annotation is created
+    @CacheEvict(value = "annotations", key = "#userDetails.id", allEntries = true)
     @Transactional
     public boolean createAnnotation(AnnotationDto annotationDto) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -98,6 +102,8 @@ public class AnnotationService {
         return true;
     }
 
+    // Caches annotation details by annotation ID.
+    @Cacheable(value = "annotationDetails", key = "#annotationId")
     public AnnotationDetailResponse getDetail(Long annotationId) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -123,25 +129,55 @@ public class AnnotationService {
 
     public void updateFriendTagged(UpdateFriendAnnotationDto dto) {
         Annotation annotation = annotationRepository.findById(dto.getAnnotationId()).orElseThrow(
-                () -> new CustomErrorException("Can not found Annotation with id: " + dto.getAnnotationId())
+                () -> new CustomErrorException("Cannot find Annotation with id: " + dto.getAnnotationId())
         );
-        List<FriendResponse> friendTagged = annotationTagService.getListAnnotationTagByAnnotationId(dto.getAnnotationId());
-        for (FriendResponse friendResponse: friendTagged) {
-            annotationTagService.delete(friendResponse.getId());
+
+        // Lấy danh sách friend hiện tại
+        List<FriendResponse> currentFriendTagged = annotationTagService.getListAnnotationTagByAnnotationId(dto.getAnnotationId());
+        Set<Long> currentFriendIds = currentFriendTagged.stream()
+                .map(FriendResponse::getId)
+                .collect(Collectors.toSet());
+
+        // Lấy danh sách friend mới
+        Set<Long> newFriendIds = dto.getNewFriends().stream()
+                .map(FriendResponse::getId)
+                .collect(Collectors.toSet());
+
+        // Xác định friend cần xóa (có trong currentFriend nhưng không có trong newFriend)
+        Set<Long> friendsToRemove = new HashSet<>(currentFriendIds);
+        friendsToRemove.removeAll(newFriendIds);
+
+        // Xác định friend cần thêm (có trong newFriend nhưng không có trong currentFriend)
+        Set<Long> friendsToAdd = new HashSet<>(newFriendIds);
+        friendsToAdd.removeAll(currentFriendIds);
+
+        // Xóa các friend không còn tồn tại trong danh sách mới
+        for (Long friendId : friendsToRemove) {
+            annotationTagService.delete(friendId);
+            evictUserCache(friendId);  // Xóa cache cho friend bị xóa
         }
 
-        for (FriendResponse friendResponse: dto.getNewFriends()) {
-            User user = userService.findUserById(friendResponse.getId()).orElseThrow(
-                    () -> new CustomErrorException("Can not found User with id: " + friendResponse.getId())
+        // Thêm các friend mới vào danh sách
+        for (Long friendId : friendsToAdd) {
+            User user = userService.findUserById(friendId).orElseThrow(
+                    () -> new CustomErrorException("Cannot find User with id: " + friendId)
             );
             AnnotationTag newAnnotationTag = AnnotationTag.builder()
                     .taggedUser(user)
                     .annotation(annotation)
                     .build();
             annotationTagService.save(newAnnotationTag);
+            evictUserCache(friendId);  // Xóa cache cho friend mới được thêm
         }
     }
 
+    @CacheEvict(value = "annotations", key = "#userId")
+    public void evictUserCache(Long userId) {
+        // Phương thức này để xóa cache cho một user cụ thể
+    }
+
+    // Clear specific cache entry when updating images
+    @CacheEvict(value = "annotationDetails", key = "#dto.annotationId")
     public void updateImages(UpdateAnnotationImagesDto dto) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 

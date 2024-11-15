@@ -1,12 +1,10 @@
 package com.example.snapheal.service;
 
-import com.example.snapheal.entities.AnnotationTag;
 import com.example.snapheal.responses.FriendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.snapheal.entities.Friend;
-import com.example.snapheal.entities.FriendStatus;
+import com.example.snapheal.enums.FriendStatus;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRepository;
 import com.example.snapheal.repository.FriendRequestRepository;

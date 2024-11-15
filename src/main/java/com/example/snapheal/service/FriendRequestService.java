@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.snapheal.entities.Friend;
 import com.example.snapheal.entities.FriendRequest;
-import com.example.snapheal.entities.FriendStatus;
+import com.example.snapheal.enums.FriendStatus;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.repository.FriendRepository;
 import com.example.snapheal.repository.FriendRequestRepository;

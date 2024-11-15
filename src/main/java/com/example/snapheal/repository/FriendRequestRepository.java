@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.snapheal.entities.FriendRequest;
-import com.example.snapheal.entities.FriendStatus;
+import com.example.snapheal.enums.FriendStatus;
 import com.example.snapheal.entities.User;
 
 import jakarta.transaction.Transactional;

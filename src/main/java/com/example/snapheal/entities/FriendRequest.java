@@ -1,7 +1,6 @@
 package com.example.snapheal.entities;
 
-import java.util.Date;
-
+import com.example.snapheal.enums.FriendStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

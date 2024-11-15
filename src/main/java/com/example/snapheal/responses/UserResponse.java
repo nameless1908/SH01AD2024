@@ -1,7 +1,7 @@
 package com.example.snapheal.responses;
 
 
-import com.example.snapheal.entities.Status;
+import com.example.snapheal.enums.Status;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

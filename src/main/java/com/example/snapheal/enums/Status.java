@@ -1,4 +1,4 @@
-package com.example.snapheal.entities;
+package com.example.snapheal.enums;
 
 public enum Status {
 	PENDING,   

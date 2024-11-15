@@ -1,6 +1,6 @@
 package com.example.snapheal.responses;
 
-import com.example.snapheal.entities.FriendStatus;
+import com.example.snapheal.enums.FriendStatus;
 import lombok.*;
 
 @Data

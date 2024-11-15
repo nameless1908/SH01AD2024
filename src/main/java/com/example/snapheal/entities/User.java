@@ -1,10 +1,10 @@
 package com.example.snapheal.entities;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.example.snapheal.enums.FriendStatus;
 import com.example.snapheal.responses.FriendRequestResponse;
 import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.ProfileResponse;
