@@ -267,4 +267,28 @@ public class AnnotationService {
         }
         redisTemplate.delete(annotationDetailsCacheKey(dto.getAnnotationId()));
     }
+
+    @Transactional
+    public void deleteAnnotation(Long annotationId) {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Annotation annotation = annotationRepository.findById(annotationId).orElseThrow(
+                () -> new CustomErrorException("Not found Annotation by annotationID!")
+        );
+        if (!Objects.equals(userDetails.getId(), annotation.getOwner().getId())) {
+            throw  new CustomErrorException("Can't remove annotation because you not is owner!");
+        }
+        redisTemplate.delete(annotationsCache(annotationId));
+        redisTemplate.delete(annotationsCache(userDetails.getId()));
+
+        List<FriendResponse> annotationTags = annotationTagService.getListAnnotationTagByAnnotationId(annotationId);
+        for(FriendResponse friend: annotationTags) {
+            redisTemplate.delete(annotationsCache(friend.getId()));
+            annotationTagService.delete(friend.getId());
+        }
+        List<PhotoResponse> photoResponses = photoService.getPhotosByAnnotationId(annotationId);
+        for (PhotoResponse photoResponse: photoResponses) {
+            photoService.delete(photoResponse.getId());
+        }
+        annotationRepository.deleteById(annotationId);
+    }
 }

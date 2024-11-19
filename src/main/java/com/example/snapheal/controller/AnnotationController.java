@@ -1,6 +1,7 @@
 package com.example.snapheal.controller;
 
 import com.example.snapheal.dtos.AnnotationDto;
+import com.example.snapheal.dtos.DeleteAnnotationDto;
 import com.example.snapheal.dtos.UpdateAnnotationImagesDto;
 import com.example.snapheal.dtos.UpdateFriendAnnotationDto;
 import com.example.snapheal.responses.AnnotationDetailResponse;
@@ -96,6 +97,20 @@ public class AnnotationController {
                         .code(200)
                         .message("Successfully!")
                         .data(annotations)
+                        .status(HttpStatus.OK)
+                        .build()
+        );
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ResponseObject> deleteAnnotation(@RequestBody DeleteAnnotationDto deleteAnnotationDto) {
+        annotationService.deleteAnnotation(deleteAnnotationDto.getAnnotationId());
+
+        return  ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code(200)
+                        .message("Delete Successfully!")
+                        .data(true)
                         .status(HttpStatus.OK)
                         .build()
         );
