@@ -55,10 +55,10 @@ public class UserService {
 	    List<UserResponse> userResponses = list.stream()
 	        .map(result -> {
 	            Long id = (Long) result[0];
-	            String username = (String) result[9];
-	            String fullName = (String) result[6];
-	            String avatar = (String) result[1];
-	            String statusString = (String) result[10];
+	            String username = (String) result[7];
+	            String fullName = (String) result[4];
+	            String avatar = (String) result[5];
+	            String statusString = (String) result[8];
 
 	            Status status = Status.valueOf(statusString.toUpperCase());
 

@@ -59,36 +59,42 @@ public class AnnotationService {
     }
 
     // Caches the list of annotations for the user.
-    public List<AnnotationResponse> getList() throws JsonProcessingException {
+    public List<AnnotationResponse> getList() {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String cacheKey = annotationsCache(userDetails.getId());
 
-        // Kiểm tra xem cache có dữ liệu không
-        if (redisTemplate.hasKey(cacheKey)) {
-            // Trả về dữ liệu từ cache, deserialize lại thành List<AnnotationResponse>
-            String json = (String) redisTemplate.opsForValue().get(cacheKey);
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(json, new TypeReference<List<AnnotationResponse>>() {
-            });
-        } else {
-            // Nếu không có, lấy dữ liệu từ DB và cache lại
-            List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userDetails.getId());
-            List<AnnotationResponse> response = annotations.stream()
-                    .map(Annotation::mapToAnnotationResponse)
-                    .collect(Collectors.toList());
-
-            // Lưu dữ liệu vào Redis dưới dạng JSON
-            try {
+        try {
+            // Kiểm tra xem cache có dữ liệu không
+            if (redisTemplate.hasKey(cacheKey)) {
+                // Trả về dữ liệu từ cache, deserialize lại thành List<AnnotationResponse>
+                String json = (String) redisTemplate.opsForValue().get(cacheKey);
                 ObjectMapper objectMapper = new ObjectMapper();
-                String json = objectMapper.writeValueAsString(response);
-                redisTemplate.opsForValue().set(cacheKey, json);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                return objectMapper.readValue(json, new TypeReference<List<AnnotationResponse>>() {});
             }
-
-            return response;
+        } catch (Exception e) {
+            // Log lỗi Redis và tiếp tục truy vấn từ MySQL
+            System.err.println("Redis không khả dụng: " + e.getMessage());
         }
+
+        // Nếu không có dữ liệu trong Redis hoặc Redis lỗi, lấy từ MySQL
+        List<Annotation> annotations = annotationRepository.findAnnotationsByOwnerIdAndTaggedUserId(userDetails.getId());
+        List<AnnotationResponse> response = annotations.stream()
+                .map(Annotation::mapToAnnotationResponse)
+                .collect(Collectors.toList());
+
+        // Lưu dữ liệu vào Redis dưới dạng JSON (nếu Redis khả dụng)
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(response);
+            redisTemplate.opsForValue().set(cacheKey, json);
+        } catch (Exception e) {
+            // Log lỗi nếu không lưu được vào Redis
+            System.err.println("Không thể lưu dữ liệu vào Redis: " + e.getMessage());
+        }
+
+        return response;
     }
+
 
     public List<AnnotationResponse> search(String query) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -101,6 +107,7 @@ public class AnnotationService {
     public boolean createAnnotation(AnnotationDto annotationDto) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        // Tạo Annotation mới
         Annotation newAnnotation = Annotation.builder()
                 .title(annotationDto.getTitle())
                 .name(annotationDto.getName())
@@ -110,14 +117,15 @@ public class AnnotationService {
                 .createAt(LocalDateTime.now())
                 .updateAt(LocalDateTime.now())
                 .owner(userDetails)
-                .createAt(LocalDateTime.now())
                 .build();
         annotationRepository.save(newAnnotation);
+
         if (!annotationDto.getImages().isEmpty()) {
             newAnnotation.setThumbnail(annotationDto.getImages().get(0));
         }
 
-        for (Long taggedId: annotationDto.getTaggedIds()) {
+        // Tạo AnnotationTag và xóa cache của tagged users
+        for (Long taggedId : annotationDto.getTaggedIds()) {
             Optional<User> userTagged = userService.findUserById(taggedId);
             if (userTagged.isPresent() && !Objects.equals(taggedId, userDetails.getId())) {
                 AnnotationTag newAnnotationTag = AnnotationTag.builder()
@@ -126,12 +134,20 @@ public class AnnotationService {
                         .createAt(LocalDateTime.now())
                         .build();
                 annotationTagService.save(newAnnotationTag);
+
+                // Xóa cache của tagged user
                 String cacheKey = annotationsCache(userTagged.get().getId());
-                redisTemplate.delete(cacheKey);
+                try {
+                    redisTemplate.delete(cacheKey);
+                } catch (Exception e) {
+                    System.err.println("Redis error while deleting cache for key: " + cacheKey);
+                    e.printStackTrace();
+                }
             }
         }
 
-        for (String image: annotationDto.getImages()) {
+        // Lưu ảnh liên kết với Annotation
+        for (String image : annotationDto.getImages()) {
             Photo photo = Photo.builder()
                     .annotation(newAnnotation)
                     .createBy(userDetails)
@@ -141,50 +157,70 @@ public class AnnotationService {
             photoService.save(photo);
         }
 
-        redisTemplate.delete(annotationsCache(userDetails.getId()));
+        // Xóa cache của user hiện tại
+        String userCacheKey = annotationsCache(userDetails.getId());
+        try {
+            redisTemplate.delete(userCacheKey);
+        } catch (Exception e) {
+            System.err.println("Redis error while deleting cache for key: " + userCacheKey);
+            e.printStackTrace();
+        }
+
         return true;
     }
 
     // Caches annotation details by annotation ID.
-    public AnnotationDetailResponse getDetail(Long annotationId) throws JsonProcessingException {
+    public AnnotationDetailResponse getDetail(Long annotationId) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String cacheKey = annotationDetailsCacheKey(annotationId);
 
-        // Check if the cache exists
-        if (redisTemplate.hasKey(cacheKey)) {
-            // Retrieve cached data as a JSON string and deserialize it into AnnotationDetailResponse
-            String cachedJson = (String) redisTemplate.opsForValue().get(cacheKey);
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(cachedJson, AnnotationDetailResponse.class);
-        } else {
-            // Fetch data from the database
-            Annotation annotation = annotationRepository.findById(annotationId).orElseThrow(
-                    () -> new CustomErrorException("Cannot find Annotation with id: " + annotationId)
-            );
-
-            List<PhotoResponse> photoResponses = photoService.getPhotosByAnnotationId(annotationId);
-
-            // Prepare the response object
-            AnnotationDetailResponse response = AnnotationDetailResponse.builder()
-                    .info(annotation.mapToAnnotationResponse())
-                    .photos(photoResponses)
-                    .build();
-
-            // Set friend tagged data for the owner
-            if (Objects.equals(annotation.getOwner().getId(), userDetails.getId())) {
-                List<FriendResponse> friendTagged = annotationTagService.getListAnnotationTagByAnnotationId(annotationId);
-                response.setFriendTagged(friendTagged);
-            } else {
-                response.setFriendTagged(new ArrayList<>());
+        try {
+            // Kiểm tra nếu dữ liệu tồn tại trong Redis
+            if (redisTemplate.hasKey(cacheKey)) {
+                // Lấy dữ liệu từ Redis và deserialize
+                String cachedJson = (String) redisTemplate.opsForValue().get(cacheKey);
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.readValue(cachedJson, AnnotationDetailResponse.class);
             }
+        } catch (Exception e) {
+            // Log lỗi và tiếp tục xử lý bằng MySQL
+            System.err.println("Redis không khả dụng: " + e.getMessage());
+        }
 
-            // Serialize response object to JSON and cache it
+        // Truy vấn từ MySQL nếu không có trong Redis hoặc Redis lỗi
+        Annotation annotation = annotationRepository.findById(annotationId).orElseThrow(
+                () -> new CustomErrorException("Cannot find Annotation with id: " + annotationId)
+        );
+
+        List<PhotoResponse> photoResponses = photoService.getPhotosByAnnotationId(annotationId);
+
+        // Chuẩn bị đối tượng response
+        AnnotationDetailResponse response = AnnotationDetailResponse.builder()
+                .info(annotation.mapToAnnotationResponse())
+                .photos(photoResponses)
+                .build();
+
+        // Thêm thông tin bạn bè được gắn thẻ (nếu là chủ sở hữu)
+        if (Objects.equals(annotation.getOwner().getId(), userDetails.getId())) {
+            List<FriendResponse> friendTagged = annotationTagService.getListAnnotationTagByAnnotationId(annotationId);
+            response.setFriendTagged(friendTagged);
+        } else {
+            response.setFriendTagged(new ArrayList<>());
+        }
+
+        // Lưu vào Redis nếu Redis khả dụng
+        try {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonResponse = objectMapper.writeValueAsString(response);
             redisTemplate.opsForValue().set(cacheKey, jsonResponse);
-            return response;
+        } catch (Exception e) {
+            // Log lỗi nếu không lưu được vào Redis
+            System.err.println("Không thể lưu dữ liệu vào Redis: " + e.getMessage());
         }
+
+        return response;
     }
+
 
     public void updateFriendTagged(UpdateFriendAnnotationDto dto) {
         Annotation annotation = annotationRepository.findById(dto.getAnnotationId()).orElseThrow(
@@ -227,7 +263,11 @@ public class AnnotationService {
                     .build();
             annotationTagService.save(newAnnotationTag);
         }
-        redisTemplate.delete(annotationDetailsCacheKey(dto.getAnnotationId()));  // Xóa cache cho annotation detail
+        try {
+            redisTemplate.delete(annotationDetailsCacheKey(dto.getAnnotationId()));  // Xóa cache cho annotation detail
+        } catch (Exception e) {
+            System.err.println("Không thể xoá liệu  Redis: " + e.getMessage());
+        }
     }
 
     // Clear specific cache entry when updating images
@@ -265,7 +305,11 @@ public class AnnotationService {
                     .build();
             photoService.save(photo);
         }
-        redisTemplate.delete(annotationDetailsCacheKey(dto.getAnnotationId()));
+        try {
+            redisTemplate.delete(annotationDetailsCacheKey(dto.getAnnotationId()));
+        } catch (Exception e) {
+            System.err.println("Không thể xoá liệu  Redis: " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -277,12 +321,22 @@ public class AnnotationService {
         if (!Objects.equals(userDetails.getId(), annotation.getOwner().getId())) {
             throw  new CustomErrorException("Can't remove annotation because you not is owner!");
         }
-        redisTemplate.delete(annotationsCache(annotationId));
-        redisTemplate.delete(annotationsCache(userDetails.getId()));
+
+        try {
+            redisTemplate.delete(annotationsCache(annotationId));
+            redisTemplate.delete(annotationsCache(userDetails.getId()));
+        } catch (Exception e) {
+            System.err.println("Không thể xoá liệu  Redis: " + e.getMessage());
+        }
+
 
         List<FriendResponse> annotationTags = annotationTagService.getListAnnotationTagByAnnotationId(annotationId);
         for(FriendResponse friend: annotationTags) {
-            redisTemplate.delete(annotationsCache(friend.getId()));
+            try {
+                redisTemplate.delete(annotationsCache(friend.getId()));
+            } catch (Exception e) {
+                System.err.println("Không thể xoá liệu  Redis: " + e.getMessage());
+            }
             annotationTagService.delete(friend.getId());
         }
         List<PhotoResponse> photoResponses = photoService.getPhotosByAnnotationId(annotationId);
