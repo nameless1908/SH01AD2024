@@ -57,7 +57,7 @@ public class UserService {
 	            Long id = (Long) result[0];
 	            String username = (String) result[7];
 	            String fullName = (String) result[4];
-	            String avatar = (String) result[5];
+	            String avatar = (String) result[1];
 	            String statusString = (String) result[8];
 
 	            Status status = Status.valueOf(statusString.toUpperCase());
