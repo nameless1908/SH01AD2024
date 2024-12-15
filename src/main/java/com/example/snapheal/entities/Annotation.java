@@ -31,6 +31,7 @@ public class Annotation {
     private Double longitude;
 
     private String address;
+
     private String thumbnail;
 
     @ManyToOne

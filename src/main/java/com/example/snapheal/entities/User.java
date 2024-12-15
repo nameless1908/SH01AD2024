@@ -2,7 +2,6 @@ package com.example.snapheal.entities;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import com.example.snapheal.enums.FriendStatus;
@@ -43,6 +42,7 @@ public class User implements UserDetails {
 
 	@Column(nullable = false)
     private String password;
+
     private String avatar;
 
 	@CreationTimestamp
