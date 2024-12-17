@@ -1,28 +1,26 @@
 package com.example.snapheal.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.example.snapheal.entities.RefreshToken;
 import com.example.snapheal.responses.*;
 import com.example.snapheal.service.JwtService;
 import com.example.snapheal.service.RefreshTokenService;
+import com.example.snapheal.service.UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.snapheal.dtos.UpdateCurrentLocationDto;
 import com.example.snapheal.dtos.UpdateUserDto;
 import com.example.snapheal.entities.User;
 import com.example.snapheal.service.UserService;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("${api.prefix}/user")
@@ -30,6 +28,8 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private UploadService uploadService;
 	@Autowired
 	private RefreshTokenService refreshTokenService;
 	@Autowired
@@ -140,5 +140,20 @@ public class UserController {
 	                    .message("Current location updated successfully!")
 	                    .build()
 	    );
+	}
+
+	@PutMapping("/update-avatar/{id}")
+	public ResponseEntity<ResponseObject> updateAvatar(@PathVariable Long id,
+													   @RequestParam MultipartFile file) throws IOException {
+		String url = uploadService.uploadImage(file);
+		userService.updateAvatar(id, url);
+		return ResponseEntity.ok(
+				ResponseObject.builder()
+						.data(url)
+						.status(HttpStatus.OK)
+						.code(HttpStatus.OK.value())
+						.message("Avatar updated successfully!")
+						.build()
+		);
 	}
 }

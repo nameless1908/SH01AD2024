@@ -23,6 +23,7 @@ import com.example.snapheal.repository.UserRepository;
 import com.example.snapheal.responses.ProfileResponse;
 import com.example.snapheal.responses.UserDistanceResponse;
 import com.example.snapheal.responses.UserResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService {
@@ -52,36 +53,34 @@ public class UserService {
 	}
 	public List<UserResponse> searchUserWithFriendRequestStatus(Long currentUserId, String searchTerm) {
 	    List<Object[]> list = userRepository.searchUsersWithFriendStatus(currentUserId, searchTerm);
-	    List<UserResponse> userResponses = list.stream()
-	        .map(result -> {
-	            Long id = (Long) result[0];
-	            String username = (String) result[7];
-	            String fullName = (String) result[4];
-	            String avatar = (String) result[1];
-	            String statusString = (String) result[8];
 
-	            Status status = Status.valueOf(statusString.toUpperCase());
+        return list.stream()
+            .map(result -> {
+                Long id = (Long) result[0];
+                String username = (String) result[7];
+                String fullName = (String) result[4];
+                String avatar = (String) result[1];
+                String statusString = (String) result[8];
 
-	            return UserResponse.builder()
-	                .id(id)
-	                .username(username)
-	                .fullName(fullName)
-	                .avatar(avatar)
-	                .status(status)
-	                .build();
-	        })
-	        .collect(Collectors.toList());
+                Status status = Status.valueOf(statusString.toUpperCase());
 
-	    return userResponses;
+                return UserResponse.builder()
+                    .id(id)
+                    .username(username)
+                    .fullName(fullName)
+                    .avatar(avatar)
+                    .status(status)
+                    .build();
+            })
+            .collect(Collectors.toList());
 	    
 	}
 	
 	public List<ProfileResponse> getProfileUser(Long userId){
 		Optional<User> users = userRepository.findById(userId);
-		List<ProfileResponse> profileResponses = users.stream()
-				.map(User::mapToProfileResponse).toList();
-		
-		return profileResponses;
+
+        return users.stream()
+                .map(User::mapToProfileResponse).toList();
 	}
 	
 	public User updateUser(UpdateUserDto dto) {
@@ -93,7 +92,6 @@ public class UserService {
 	    user.setEmail(dto.getEmail());
 	    user.setAvatar(dto.getAvatar());
 
-	    
 	    return userRepository.save(user);
 	}
 
@@ -115,7 +113,7 @@ public class UserService {
 		}
 		if (existToken.getTokenExpirationDate().isBefore(LocalDateTime.now())) {
 			existToken.setRevoked(true);
-			existToken.setUpdateAt(LocalDateTime.now());
+			existToken.setUpdatedAt(LocalDateTime.now());
 			refreshTokenService.save(existToken);
 		}
 		return existToken.getUser();
@@ -226,5 +224,13 @@ public class UserService {
 			newUserLocation.setCurrentLatitude(dto.getCurrentLatitude());
 			userLocationRepository.save(newUserLocation);
 		}
+	}
+
+	public void updateAvatar(Long id, String avatar) {
+		User user = userRepository.findById(id).orElseThrow(
+				() -> new CustomErrorException("Can not found User with id: " + id)
+		);
+		user.setAvatar(avatar);
+		userRepository.save(user);
 	}
 }

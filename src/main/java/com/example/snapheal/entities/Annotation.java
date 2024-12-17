@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.RedisHash;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -34,17 +35,20 @@ public class Annotation {
 
     private String thumbnail;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "owner_id")
     private User owner;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "annotation", cascade = CascadeType.ALL)
+    List<Photo> photos;
+
     @CreationTimestamp
-    @Column(updatable = false, columnDefinition = "timestamp")
-    private LocalDateTime createAt;
+    @Column(updatable = false, columnDefinition = "timestamp", name = "created_at")
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(columnDefinition = "timestamp")
-    private LocalDateTime updateAt;
+    @Column(columnDefinition = "timestamp", name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public AnnotationResponse mapToAnnotationResponse() {
         return AnnotationResponse.builder()
@@ -56,8 +60,8 @@ public class Annotation {
                 .address(address)
                 .thumbnail(thumbnail)
                 .owner(owner.mapToFriendResponse())
-                .createAt(createAt != null ? DateTimeUtils.toTimestamp(createAt) : null)
-                .updateAt(updateAt != null ? DateTimeUtils.toTimestamp(createAt) : null)
+                .createAt(createdAt != null ? DateTimeUtils.toTimestamp(createdAt) : null)
+                .updateAt(updatedAt != null ? DateTimeUtils.toTimestamp(createdAt) : null)
                 .build();
     }
 }

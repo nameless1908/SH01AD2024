@@ -42,7 +42,7 @@ public class RefreshTokenService {
                 .tokenExpirationDate(LocalDateTime.now().plusSeconds(tokenExpirationTime))
                 .refreshTokenExpirationDate(LocalDateTime.now().plusSeconds(refreshTokenExpirationTime))
                 .createAt(LocalDateTime.now())
-                .updateAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
         return refreshTokenRepository.save(refreshToken);
     }
@@ -69,7 +69,7 @@ public class RefreshTokenService {
                 .tokenType("Bearer")
                 .user(user)
                 .createAt(LocalDateTime.now())
-                .updateAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
         return refreshTokenRepository.save(newToken);
     }

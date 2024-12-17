@@ -29,6 +29,6 @@ AnnotationTag {
     private User taggedUser;
 
     @CreationTimestamp
-    @Column(updatable = false, columnDefinition = "timestamp")
-    private LocalDateTime createAt;
+    @Column(updatable = false, columnDefinition = "timestamp", name = "created_at")
+    private LocalDateTime createdAt;
 }

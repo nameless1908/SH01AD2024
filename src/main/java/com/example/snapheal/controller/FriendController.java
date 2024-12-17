@@ -76,13 +76,13 @@ public class FriendController {
 
     // API để xóa bạn bè
     @DeleteMapping("/delete")
-    public ResponseEntity<ResponseObject> deleteFriend(@RequestBody UpdateFriendRequestDto dto) {
+    public ResponseEntity<ResponseObject> deleteFriend(@RequestBody Long friendId) {
         
     	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
 
-        friendService.deleteFriend(userId, dto.getRequesterId());
+        friendService.deleteFriend(userId, friendId);
 
         return ResponseEntity.ok(
         		ResponseObject.builder()

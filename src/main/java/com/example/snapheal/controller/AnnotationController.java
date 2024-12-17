@@ -6,14 +6,19 @@ import com.example.snapheal.dtos.UpdateAnnotationImagesDto;
 import com.example.snapheal.dtos.UpdateFriendAnnotationDto;
 import com.example.snapheal.responses.AnnotationDetailResponse;
 import com.example.snapheal.responses.AnnotationResponse;
+import com.example.snapheal.responses.PhotoResponse;
 import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.service.AnnotationService;
+import com.example.snapheal.service.UploadService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("${api.prefix}/annotation")
@@ -21,18 +26,20 @@ import java.util.List;
 public class AnnotationController {
     @Autowired
     private AnnotationService annotationService;
+    @Autowired
+    private UploadService uploadService;
 
     @GetMapping("/list")
     public ResponseEntity<ResponseObject> getListAnnotation() throws JsonProcessingException {
         List<AnnotationResponse> annotations = annotationService.getList();
 
-        return  ResponseEntity.ok(
-            ResponseObject.builder()
-                    .code(200)
-                    .message("Successfully!")
-                    .data(annotations)
-                    .status(HttpStatus.OK)
-                    .build()
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .code(200)
+                        .message("Successfully!")
+                        .data(annotations)
+                        .status(HttpStatus.OK)
+                        .build()
         );
     }
 
@@ -75,12 +82,22 @@ public class AnnotationController {
         );
     }
 
-    @PutMapping("/update-images")
-    public ResponseEntity<ResponseObject> updateImages(@RequestBody UpdateAnnotationImagesDto dto) {
-        annotationService.updateImages(dto);
+    @PutMapping("/update-images/{annotationId}")
+    public ResponseEntity<ResponseObject> updateImages(@PathVariable("annotationId") Long annotationId,
+                                                       @RequestBody MultipartFile[] files) throws IOException {
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            String url = uploadService.uploadImage(file);
+            urls.add(url);
+        }
+        UpdateAnnotationImagesDto dto = new UpdateAnnotationImagesDto(
+                annotationId,
+                urls
+        );
+        List<PhotoResponse> list = annotationService.updateImages(dto);
         return ResponseEntity.ok(
                 ResponseObject.builder()
-                        .data(true)
+                        .data(list)
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .message("Create Successfully!")
@@ -92,7 +109,7 @@ public class AnnotationController {
     public ResponseEntity<ResponseObject> searchAnnotation(@RequestParam String query) {
         List<AnnotationResponse> annotations = annotationService.search(query);
 
-        return  ResponseEntity.ok(
+        return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code(200)
                         .message("Successfully!")
@@ -106,7 +123,7 @@ public class AnnotationController {
     public ResponseEntity<ResponseObject> deleteAnnotation(@RequestBody DeleteAnnotationDto deleteAnnotationDto) {
         annotationService.deleteAnnotation(deleteAnnotationDto.getAnnotationId());
 
-        return  ResponseEntity.ok(
+        return ResponseEntity.ok(
                 ResponseObject.builder()
                         .code(200)
                         .message("Delete Successfully!")

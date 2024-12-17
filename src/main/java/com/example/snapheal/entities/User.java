@@ -9,22 +9,20 @@ import com.example.snapheal.responses.FriendRequestResponse;
 import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.ProfileResponse;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Data
-@Entity
-@Builder
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Entity
 public class User implements UserDetails {
 
 	@Id
@@ -46,11 +44,11 @@ public class User implements UserDetails {
     private String avatar;
 
 	@CreationTimestamp
-	@Column(updatable = false, columnDefinition = "timestamp")
+	@Column(updatable = false, columnDefinition = "timestamp", name = "created_at")
 	private LocalDateTime createdAt;
 
 	@UpdateTimestamp
-	@Column(columnDefinition = "timestamp")
+	@Column(columnDefinition = "timestamp", name = "updated_at")
 	private LocalDateTime updatedAt;
 
 	@Override

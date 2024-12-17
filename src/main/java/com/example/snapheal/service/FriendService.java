@@ -40,7 +40,7 @@ public class FriendService {
     public List<FriendResponse> getAllFriends(Long userId) {
         List<User> friends = new ArrayList<>();
         friends.addAll(friendRepository.findFriendsWhereUserIsUser(userId));
-        friends.addAll(friendRepository.findFriendsWhereUserIsFriend(userId));
+//        friends.addAll(friendRepository.findFriendsWhereUserIsFriend(userId));
         return friends.stream()
                 .map(user -> user.mapToFriendResponse(FriendStatus.ACCEPTED))
                 .toList();

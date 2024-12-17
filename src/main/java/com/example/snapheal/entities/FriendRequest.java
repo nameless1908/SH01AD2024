@@ -35,11 +35,12 @@ public class FriendRequest {
 
     @Enumerated(EnumType.STRING)  // Sử dụng EnumType.STRING để lưu trữ giá trị enum dưới dạng chuỗi
     private FriendStatus status;
+
     @CreationTimestamp
-    @Column(updatable = false, columnDefinition = "timestamp")
+    @Column(updatable = false, columnDefinition = "timestamp", name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(columnDefinition = "timestamp")
+    @Column(columnDefinition = "timestamp", name = "updated_at")
     private LocalDateTime updatedAt;
 }

@@ -10,11 +10,9 @@ import com.example.snapheal.responses.ResponseObject;
 import com.example.snapheal.responses.VerifyOTPResponse;
 import com.example.snapheal.service.*;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,7 +73,7 @@ public class AuthenticationController {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         String jwtToken = jwtService.generateToken(authenticatedUser);
-        ;
+
         RefreshToken refreshToken = refreshTokenService.save(authenticatedUser, jwtToken);
         LoginResponse loginResponse = LoginResponse.builder()
                 .id(authenticatedUser.getId())

@@ -46,18 +46,18 @@ public class AuthenticationService {
     public User authenticate(LoginUserDto input) throws Exception {
         User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow(
-                     () ->  new CustomErrorException("User not found for email: " + input.getEmail())
+                        () -> new CustomErrorException("User not found for email: " + input.getEmail())
                 );
         if (!passwordEncoder.matches(input.getPassword(), user.getPassword())) {
             throw new CustomErrorException("Password not correct!");
         }
-        authenticationManager.authenticate(
+        var auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getUsername(),
                         input.getPassword()
                 )
         );
 
-        return user;
+        return (User) auth.getPrincipal();
     }
 }

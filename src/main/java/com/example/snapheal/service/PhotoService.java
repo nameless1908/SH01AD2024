@@ -1,7 +1,9 @@
 package com.example.snapheal.service;
 
 import com.example.snapheal.entities.Photo;
+import com.example.snapheal.repository.AnnotationRepository;
 import com.example.snapheal.repository.PhotoRepository;
+import com.example.snapheal.repository.UserRepository;
 import com.example.snapheal.responses.PhotoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import java.util.List;
 public class PhotoService {
     @Autowired
     private PhotoRepository photoRepository;
+    private AnnotationRepository annotationRepository;
+    private UserRepository userRepository;
 
     public void save(Photo photo) {
         photoRepository.save(photo);

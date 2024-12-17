@@ -19,36 +19,35 @@ public class Photo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    private String photoUrl;
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "annotation_id")
     private Annotation annotation;
 
-    private String photoUrl;
-
     @ManyToOne
-    @JoinColumn(name = "create_by")
-    private User createBy;
+    @JoinColumn(name = "created_by")
+    private User createdBy;
 
     // Thay thế Date bằng LocalDateTime
     @CreationTimestamp
-
-    @Column(name = "create_at", nullable = false, columnDefinition = "timestamp")
-    private LocalDateTime createAt;
+    @Column(name = "created_at", nullable = false, columnDefinition = "timestamp")
+    private LocalDateTime createdAt;
 
     // Sử dụng LocalDateTime trong PhotoResponse
     public PhotoResponse mapToPhotoResponse() {
         return PhotoResponse.builder()
                 .id(id)
                 .photoUrl(photoUrl)
-                .createAt(createAt != null ? DateTimeUtils.toTimestamp(createAt) : null) // Chuyển LocalDateTime sang String
+                .createAt(createdAt != null ? DateTimeUtils.toTimestamp(createdAt) : null) // Chuyển LocalDateTime sang String
                 .build();
     }
 
     // Gán giá trị cho createAt trước khi persist
     @PrePersist
     public void prePersist() {
-        if (createAt == null) {
-            createAt = LocalDateTime.now();  // Set createAt khi chưa được gán
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();  // Set createAt khi chưa được gán
         }
     }
 }

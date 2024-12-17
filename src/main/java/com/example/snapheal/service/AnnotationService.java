@@ -13,22 +13,16 @@ import com.example.snapheal.responses.AnnotationDetailResponse;
 import com.example.snapheal.responses.AnnotationResponse;
 import com.example.snapheal.responses.FriendResponse;
 import com.example.snapheal.responses.PhotoResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,7 +54,9 @@ public class AnnotationService {
 
     // Caches the list of annotations for the user.
     public List<AnnotationResponse> getList() {
-        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        var principal = auth.getPrincipal();
+        User userDetails = (User) principal;
         String cacheKey = annotationsCache(userDetails.getId());
 
         try {
@@ -114,8 +110,8 @@ public class AnnotationService {
                 .address(annotationDto.getAddress())
                 .latitude(annotationDto.getLatitude())
                 .longitude(annotationDto.getLongitude())
-                .createAt(LocalDateTime.now())
-                .updateAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .owner(userDetails)
                 .build();
         annotationRepository.save(newAnnotation);
@@ -131,7 +127,7 @@ public class AnnotationService {
                 AnnotationTag newAnnotationTag = AnnotationTag.builder()
                         .annotation(newAnnotation)
                         .taggedUser(userTagged.get())
-                        .createAt(LocalDateTime.now())
+                        .createdAt(LocalDateTime.now())
                         .build();
                 annotationTagService.save(newAnnotationTag);
 
@@ -150,9 +146,9 @@ public class AnnotationService {
         for (String image : annotationDto.getImages()) {
             Photo photo = Photo.builder()
                     .annotation(newAnnotation)
-                    .createBy(userDetails)
+                    .createdBy(userDetails)
                     .photoUrl(image)
-                    .createAt(LocalDateTime.now())
+                    .createdAt(LocalDateTime.now())
                     .build();
             photoService.save(photo);
         }
@@ -221,7 +217,6 @@ public class AnnotationService {
         return response;
     }
 
-
     public void updateFriendTagged(UpdateFriendAnnotationDto dto) {
         Annotation annotation = annotationRepository.findById(dto.getAnnotationId()).orElseThrow(
                 () -> new CustomErrorException("Cannot find Annotation with id: " + dto.getAnnotationId())
@@ -259,7 +254,7 @@ public class AnnotationService {
             AnnotationTag newAnnotationTag = AnnotationTag.builder()
                     .taggedUser(user)
                     .annotation(annotation)
-                    .createAt(LocalDateTime.now())
+                    .createdAt(LocalDateTime.now())
                     .build();
             annotationTagService.save(newAnnotationTag);
         }
@@ -271,7 +266,7 @@ public class AnnotationService {
     }
 
     // Clear specific cache entry when updating images
-    public void updateImages(UpdateAnnotationImagesDto dto) {
+    public List<PhotoResponse> updateImages(UpdateAnnotationImagesDto dto) {
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Annotation annotation = annotationRepository.findById(dto.getAnnotationId()).orElseThrow(
@@ -300,8 +295,8 @@ public class AnnotationService {
             Photo photo = Photo.builder()
                     .annotation(annotation)
                     .photoUrl(img)
-                    .createAt(LocalDateTime.now())
-                    .createBy(userDetails)
+                    .createdAt(LocalDateTime.now())
+                    .createdBy(userDetails)
                     .build();
             photoService.save(photo);
         }
@@ -310,6 +305,7 @@ public class AnnotationService {
         } catch (Exception e) {
             System.err.println("Không thể xoá liệu  Redis: " + e.getMessage());
         }
+        return photoService.getPhotosByAnnotationId(dto.getAnnotationId());
     }
 
     @Transactional

@@ -36,8 +36,8 @@ public class RefreshToken {
     private LocalDateTime createAt;
 
     @UpdateTimestamp
-    @Column(name = "update_at", columnDefinition = "timestamp")
-    private LocalDateTime updateAt;
+    @Column(name = "updated_at", columnDefinition = "timestamp")
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
